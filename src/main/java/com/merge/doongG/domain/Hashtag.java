@@ -6,16 +6,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Board {
+public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long boardId;
+    private Long hashtagId;
 
-    @Column(nullable = false)
-    private String boardName;
+    @Column(nullable = false, unique = true)
+    private String hashtagName;
+
+    @ManyToMany(mappedBy = "hashtags")
+    private List<Post> posts;
 }

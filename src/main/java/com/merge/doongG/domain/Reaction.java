@@ -17,7 +17,7 @@ public class Reaction {
     private Long reactionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "pk")
     private User user;
 
     @ManyToOne

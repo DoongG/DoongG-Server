@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Builder
@@ -36,14 +37,23 @@ public class Post {
     private Integer views = 0;
 
     @Column(nullable = false)
-    private Integer comments = 0;
+    private Integer commentCount = 0;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    @ManyToMany
+    @JoinTable(name = "post_hashtags",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id") )
+    private List<Hashtag> hashtags;
+
+    @Column(columnDefinition = "BIT", nullable = false)
+    private Boolean commentAllowed = true;
 
     @Column(columnDefinition = "timestamp default current_timestamp", nullable = false)
     private Timestamp createdAt;
 
     @Column(columnDefinition = "timestamp default current_timestamp", nullable = false)
     private Timestamp updatedAt;
-
-    @Column(nullable = false)
-    private Boolean commentAllowed = true;
 }
