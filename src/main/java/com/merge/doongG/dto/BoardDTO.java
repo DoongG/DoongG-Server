@@ -1,6 +1,5 @@
-package com.merge.doongG.domain;
+package com.merge.doongG.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,14 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Board {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BoardDTO {
     private Long boardId;
-
-    @Column(nullable = false)
     private String boardName;
 }

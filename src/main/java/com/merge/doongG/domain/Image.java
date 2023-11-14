@@ -11,11 +11,18 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Board {
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long boardId;
+    private Long imageId;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     @Column(nullable = false)
-    private String boardName;
+    private String url;
+
+    @Column(nullable = false)
+    private String description;
 }

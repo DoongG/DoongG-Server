@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
 @Getter
 @Builder
 @Entity
+@NoArgsConstructor
 @AllArgsConstructor
 public class Comment {
     @Id
@@ -18,11 +20,11 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private Post postId;
+    private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "poster_pk")
-    private Post posterPk;
+    @JoinColumn(name = "commenter_pk", referencedColumnName = "pk")
+    private User commenter;
 
     @Column(length = 500, nullable = false)
     private String content;
@@ -32,10 +34,4 @@ public class Comment {
 
     @Column(name = "updated_at", columnDefinition = "timestamp default current_timestamp", nullable = false)
     private Timestamp updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "commenter_pk")
-    private User user;
-
-    public Comment() {}
 }
