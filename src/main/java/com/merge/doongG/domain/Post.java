@@ -42,6 +42,9 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostImage> postImages;
+
     @ManyToMany
     @JoinTable(name = "post_hashtags",
             joinColumns = @JoinColumn(name = "post_id"),

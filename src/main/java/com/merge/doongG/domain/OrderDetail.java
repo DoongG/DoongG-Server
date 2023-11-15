@@ -9,20 +9,20 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
-public class Image {
+@NoArgsConstructor
+public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long imageId;
+    private Long orderDetailID;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @JoinColumn(name = "order_id")
+    private Order order;
 
-    @Column(nullable = false)
-    private String url;
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @Column(nullable = false)
-    private String description;
+    private int quantity;
 }
