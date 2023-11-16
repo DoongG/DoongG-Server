@@ -1,14 +1,39 @@
 package com.merge.doongG.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "members")
+import java.util.UUID;
+
 @Getter
+@Builder
+@Entity
+@Table(name = "users")
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pk;
+    private Long id;
 
+    @Column(columnDefinition = "BINARY(16)", nullable = false, unique = true)
+    private UUID uuid;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(length = 15, nullable = false, unique = true)
+    private String nickname;
+
+    @Column
+    private String profileImg;
+
+    @Column(length = 15)
+    private String phoneNumber;
 }
