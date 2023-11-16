@@ -1,5 +1,6 @@
 package com.merge.doongG.service;
 
+import com.merge.doongG.domain.Post;
 import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
 import com.merge.doongG.repository.BoardRepository;
@@ -50,7 +51,14 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public PostDTO createPost(PostDTO postDTO) {
-        return null;
+        // PostDTO를 Post 엔터티로 변환
+        Post postEntity = mapper.map(postDTO, Post.class);
+
+        // 게시물 저장
+        Post savedPost = postRepository.save(postEntity);
+
+        // 저장된 게시물을 PostDTO로 변환하여 반환
+        return mapper.map(savedPost, PostDTO.class);
     }
 
     @Override

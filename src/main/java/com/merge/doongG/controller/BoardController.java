@@ -54,7 +54,7 @@ public class BoardController {
         return new ResponseEntity<>(posts, headers, HttpStatus.OK);
     }
 
-    // 게시판 검색
+    // 게시판 검색 (리스트 유형)
     @GetMapping("/list/search")
     public ResponseEntity<List<PostDTO>> searchListBoard(
             @RequestParam String keyword,
@@ -80,7 +80,7 @@ public class BoardController {
     }
 
     // 게시물 수정
-    @PatchMapping("/{postId}")
+    @PostMapping("/update/{postId}")
     public ResponseEntity<PostDTO> updatePost(
             @PathVariable Long postId,
             @RequestBody PostDTO postDTO
@@ -90,7 +90,7 @@ public class BoardController {
     }
 
     // 게시물 삭제
-    @DeleteMapping("/{postId}")
+    @PostMapping("/delete/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         boardService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
