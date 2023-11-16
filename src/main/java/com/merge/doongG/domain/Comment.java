@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -23,8 +25,18 @@ public class Comment {
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "commenter_pk", referencedColumnName = "pk")
+    @JoinColumn(name = "commenter_id", referencedColumnName = "id")
     private User commenter;
+
+    // 부모 댓글 (대댓글의 경우)
+    @Builder.Default
+    @ManyToOne
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment = null;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> childComments = new ArrayList<>();
 
     @Column(length = 500, nullable = false)
     private String content;

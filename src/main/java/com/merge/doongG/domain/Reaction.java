@@ -17,16 +17,18 @@ public class Reaction {
     private Long reactionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "pk")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer good = 0;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer bad = 0;
 }

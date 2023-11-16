@@ -24,7 +24,7 @@ public class Post {
     private Board board;
 
     @ManyToOne
-    @JoinColumn(name = "poster_pk")
+    @JoinColumn(name = "poster_id")
     private User user;
 
     @Column(length = 50, nullable = false)
@@ -33,9 +33,11 @@ public class Post {
     @Column(length = 1000, nullable = false)
     private String content;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer views = 0;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer commentCount = 0;
 
@@ -51,6 +53,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id") )
     private List<Hashtag> hashtags;
 
+    @Builder.Default
     @Column(columnDefinition = "BIT", nullable = false)
     private Boolean commentAllowed = true;
 
