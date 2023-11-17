@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Getter
 @Builder
 @Entity
@@ -36,4 +34,4 @@ public class User {
 
     @Column(length = 15)
     private String phoneNumber;
-}
+
