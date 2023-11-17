@@ -4,35 +4,34 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
 @Entity
+@Table(name = "users")
 @AllArgsConstructor
-@Table(name = "members")
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pk;
+    private Long id;
 
-    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, unique = true)
     private UUID uuid;
 
-    @Column(nullable = false)
-    private String userId;
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 15, nullable = false)
+    @Column(length = 15, nullable = false, unique = true)
     private String nickname;
 
-    @Column(length = 255)
+    @Column
     private String profileImg;
 
-    @Column(nullable = false)
-    private int role; // 0: 일반회원, 1: 관리자
+    @Column(length = 15)
+    private String phoneNumber;
 
-    public User() {}
-}
