@@ -2,50 +2,55 @@ package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.PostDTO;
 import com.merge.doongG.service.BoardService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
+@Slf4j
 @RequestMapping("/boards")
 public class BoardController {
     @Autowired
     private BoardService boardService;
 
     // 게시판 (갤러리 유형)
-    @GetMapping("/gallery")
-    public ResponseEntity<List<PostDTO>> getGalleryBoard(
+    @GetMapping("/gallery/{boardId}")
+    public ResponseEntity<Page<PostDTO>> getGalleryBoard(
+            @PathVariable Long boardId,
             @RequestParam(defaultValue = "latest") String order,
             @RequestParam(defaultValue = "12") int pageSize,
-            @RequestParam(defaultValue = "1") int page
-    ) {
-        List<PostDTO> posts = boardService.getGalleryBoard(order, pageSize, page);
+            @RequestParam(defaultValue = "1") int page) {
+        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
         return ResponseEntity.ok(posts);
     }
 
     // 게시판 검색 (갤러리 유형)
-    @GetMapping("/gallery/search")
-    public ResponseEntity<List<PostDTO>> searchGalleryBoard(
+    @GetMapping("/gallery/{boardId}/search")
+    public ResponseEntity<Page<PostDTO>> searchGalleryBoard(
+            @PathVariable Long boardId,
             @RequestParam String keyword,
             @RequestParam(defaultValue = "latest") String order,
+            @RequestParam(defaultValue = "title") String category,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostDTO> posts = boardService.searchGalleryBoard(keyword, order, page, pageSize);
+        Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
         return ResponseEntity.ok(posts);
     }
 
     // 게시판 (리스트 유형)
-    @GetMapping("/list")
-    public ResponseEntity<List<PostDTO>> getListBoard(
-            @RequestParam(defaultValue = "10") int pageSize,
+    @GetMapping("/list/{boardId}")
+    public ResponseEntity<Page<PostDTO>> getListBoard(
+            @PathVariable Long boardId,
+            @RequestParam(defaultValue = "latest") String order,
+            @RequestParam(defaultValue = "16") int pageSize,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostDTO> posts = boardService.getListBoard(pageSize, page);
+        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
         long totalPosts = boardService.getTotalPosts();
 
         HttpHeaders headers = new HttpHeaders();
@@ -55,13 +60,16 @@ public class BoardController {
     }
 
     // 게시판 검색 (리스트 유형)
-    @GetMapping("/list/search")
-    public ResponseEntity<List<PostDTO>> searchListBoard(
+    @GetMapping("/list/{boardId}/search")
+    public ResponseEntity<Page<PostDTO>> searchListBoard(
+            @PathVariable Long boardId,
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "12") int pageSize,
+            @RequestParam(defaultValue = "latest") String order,
+            @RequestParam(defaultValue = "title") String category,
+            @RequestParam(defaultValue = "16") int pageSize,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostDTO> posts = boardService.searchListBoard(keyword, pageSize, page);
+        Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
         return ResponseEntity.ok(posts);
     }
 
@@ -86,6 +94,7 @@ public class BoardController {
             @RequestBody PostDTO postDTO
     ) {
         PostDTO updatedPost = boardService.updatePost(postId, postDTO);
+        log.info("Received PostDTO: {}", postDTO);
         return ResponseEntity.ok(updatedPost);
     }
 

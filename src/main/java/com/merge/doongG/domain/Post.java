@@ -23,21 +23,24 @@ public class Post {
     @JoinColumn(name = "board_id")
     private Board board;
 
+    @Column(name = "board_id", insertable = false, updatable = false)
+    private Long boardId;
+
     @ManyToOne
     @JoinColumn(name = "poster_id")
     private User user;
 
+    @Builder.Default
     @Column(length = 50, nullable = false)
-    private String title;
-
-    @Column(length = 1000, nullable = false)
-    private String content;
+    private String title = "";
 
     @Builder.Default
+    @Column(length = 1000, nullable = false)
+    private String content = "";
+
     @Column(nullable = false)
     private Integer views = 0;
 
-    @Builder.Default
     @Column(nullable = false)
     private Integer commentCount = 0;
 
@@ -53,13 +56,31 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id") )
     private List<Hashtag> hashtags;
 
-    @Builder.Default
     @Column(columnDefinition = "BIT", nullable = false)
     private Boolean commentAllowed = true;
 
-    @Column(columnDefinition = "timestamp default current_timestamp", nullable = false)
+    @Column(nullable = false)
     private Timestamp createdAt;
 
-    @Column(columnDefinition = "timestamp default current_timestamp", nullable = false)
+    @Column(nullable = false)
     private Timestamp updatedAt;
+
+    public Post(String title, String content, Integer views, Board board, User user) {
+        this.title = title;
+        this.content = content;
+        this.views = views;
+        this.board = board;
+        this.user = user;
+        onCreate();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
 }

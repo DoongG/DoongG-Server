@@ -1,16 +1,20 @@
 package com.merge.doongG.service;
 
+import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface BoardService {
+    List<BoardDTO> getAllBoards();
 
-    List<PostDTO> getGalleryBoard(String order, int pageSize, int page);
-    List<PostDTO> searchGalleryBoard(String keyword, String order, int page, int pageSize);
+    BoardDTO createBoard(String boardName);
+    BoardDTO updateBoard(Long boardId, String newBoardName);
+    void deleteBoard(Long boardId);
 
-    List<PostDTO> getListBoard(int pageSize, int page);
-    List<PostDTO> searchListBoard(String keyword, int pageSize, int page);
+    Page<PostDTO> getBoard(Long boardId, String order, int pageSize, int page);
+    Page<PostDTO> searchBoard(Long boardId, String keyword, String order, String category, int page, int pageSize);
 
     PostDTO getPost(Long postId);
     PostDTO createPost(PostDTO postDTO);

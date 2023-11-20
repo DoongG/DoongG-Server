@@ -1,78 +1,209 @@
 package com.merge.doongG.service;
 
+import com.merge.doongG.domain.Board;
 import com.merge.doongG.domain.Post;
 import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
 import com.merge.doongG.repository.BoardRepository;
 import com.merge.doongG.repository.PostRepository;
-import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
-    private final ModelMapper mapper;
     private final PostRepository postRepository;
 
-    public BoardServiceImpl(BoardRepository boardRepository, ModelMapper mapper,
-                            PostRepository postRepository) {
+    @Autowired
+    public BoardServiceImpl(BoardRepository boardRepository, PostRepository postRepository) {
         this.boardRepository = boardRepository;
-        this.mapper = mapper;
         this.postRepository = postRepository;
     }
 
     @Override
-    public List<PostDTO> getGalleryBoard(String order, int pageSize, int page) {
-        return Collections.emptyList();
+    public List<BoardDTO> getAllBoards() {
+        List<Board> boards = boardRepository.findAll();
+        return boards.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public BoardDTO createBoard(String boardName) {
+        Board newBoard = Board.builder().boardName(boardName).build();
+        Board savedBoard = boardRepository.save(newBoard);
+
+        return convertToDTO(savedBoard);
     }
 
     @Override
-    public List<PostDTO> searchGalleryBoard(String keyword, String order, int page, int pageSize) {
-        return Collections.emptyList();
-    }
+    public BoardDTO updateBoard(Long boardId, String newBoardName) {
+        Optional<Board> board = boardRepository.findById(boardId);
 
-    @Override
-    public List<PostDTO> getListBoard(int pageSize, int page) {
-        return Collections.emptyList();
-    }
+        if (board.isPresent()) {
+            Board presentBoard = board.get();
+            presentBoard.changeBoardName(newBoardName);
+            Board updatedBoard = boardRepository.save(presentBoard);
+            return convertToDTO(updatedBoard);
+        }
 
-    @Override
-    public List<PostDTO> searchListBoard(String keyword, int pageSize, int page) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public PostDTO getPost(Long postId) {
         return null;
     }
 
     @Override
+    public void deleteBoard(Long boardId) {
+        boardRepository.deleteById(boardId);
+    }
+
+    @Override
+    public Page<PostDTO> getBoard(Long boardId, String order, int pageSize, int page) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<Post> posts;
+        if ("latest".equalsIgnoreCase(order)) {
+            posts = postRepository.findByBoardIdOrderByCreatedAtDesc(boardId, pageable);
+        } else {
+            posts = postRepository.findByBoardIdOrderByViewsDesc(boardId, pageable);
+        }
+        return posts.map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<PostDTO> searchBoard(Long boardId, String keyword, String order, String category, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<Post> posts;
+
+        if (StringUtils.hasText(keyword)) {
+            if ("latest".equalsIgnoreCase(order)) {
+                posts = switch (category.toLowerCase()) {
+                    case "title" ->
+                            postRepository.findByBoardIdAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
+                    case "author" ->
+                            postRepository.findByBoardIdAndUserNicknameContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
+                    case "hashtag" ->
+                            postRepository.findByBoardIdAndHashtagsContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
+                    case "content" ->
+                            postRepository.findByBoardIdAndContentContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
+                    default -> Page.empty();
+                };
+            } else if ("views".equalsIgnoreCase(order)) {
+                posts = switch (category.toLowerCase()) {
+                    case "title" ->
+                            postRepository.findByBoardIdAndTitleContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
+                    case "author" ->
+                            postRepository.findByBoardIdAndUserNicknameContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
+                    case "hashtag" ->
+                            postRepository.findByBoardIdAndHashtagsContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
+                    case "content" ->
+                            postRepository.findByBoardIdAndContentContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
+                    default -> Page.empty();
+                };
+            } else {
+                posts = Page.empty();
+            }} else {
+            posts = Page.empty();
+        }
+
+        return posts.map(this::convertToDTO);
+    }
+
+    @Override
+    public PostDTO getPost(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        return post.map(this::convertToDTO).orElse(null);
+    }
+
+    @Override
     public PostDTO createPost(PostDTO postDTO) {
-        // PostDTO를 Post 엔터티로 변환
-        Post postEntity = mapper.map(postDTO, Post.class);
+        Post post = new Post(
+                postDTO.getTitle(),
+                postDTO.getContent(),
+                postDTO.getViews(),
+                postDTO.getBoard(),
+                postDTO.getUser()
+        );
 
-        // 게시물 저장
-        Post savedPost = postRepository.save(postEntity);
+        Post savedPost = postRepository.save(post);
 
-        // 저장된 게시물을 PostDTO로 변환하여 반환
-        return mapper.map(savedPost, PostDTO.class);
+        return convertToDTO(savedPost);
     }
 
     @Override
     public PostDTO updatePost(Long postId, PostDTO postDTO) {
+        Optional<Post> post = postRepository.findById(postId);
+
+        if (post.isPresent()) {
+            Post existingPost = post.get();
+
+            PostDTO updatedPostDTO = PostDTO.builder()
+                    .postId(existingPost.getPostId())
+                    .title(postDTO.getTitle())
+                    .content(postDTO.getContent())
+                    .views(existingPost.getViews())
+                    .commentCount(existingPost.getCommentCount())
+                    .user(existingPost.getUser())
+                    .board(existingPost.getBoard())
+                    .comments(postDTO.getComments())
+                    .postImages(postDTO.getPostImages())
+                    .hashtags(postDTO.getHashtags())
+                    .commentAllowed(postDTO.getCommentAllowed())
+                    .createdAt(existingPost.getCreatedAt())
+                    .updatedAt(existingPost.getUpdatedAt())
+                    .build();
+
+            Post updatedPost = postRepository.save(convertToEntity(updatedPostDTO));
+            return convertToDTO(updatedPost);
+        }
+
         return null;
     }
 
     @Override
     public void deletePost(Long postId) {
-
+        postRepository.deleteById(postId);
     }
 
     @Override
     public long getTotalPosts() {
         return postRepository.count();
+    }
+
+    private BoardDTO convertToDTO(Board board) {
+        return BoardDTO.builder()
+                .boardId(board.getBoardId())
+                .boardName(board.getBoardName())
+                .build();
+    }
+
+    private PostDTO convertToDTO(Post post) {
+        return PostDTO.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .views(post.getViews())
+                .user(post.getUser())
+                .board(post.getBoard())
+                .createdAt(post.getCreatedAt())
+                .build();
+    }
+
+    private Post convertToEntity(PostDTO postDTO) {
+        return Post.builder()
+                .postId(postDTO.getPostId())
+                .title(postDTO.getTitle())
+                .content(postDTO.getContent())
+                .views(postDTO.getViews())
+                .commentCount(postDTO.getCommentCount())
+                .user(postDTO.getUser())
+                .board(postDTO.getBoard())
+                .createdAt(postDTO.getCreatedAt())
+                .updatedAt(postDTO.getUpdatedAt())
+                .build();
     }
 }
