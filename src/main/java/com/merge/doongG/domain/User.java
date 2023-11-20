@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @Builder
 @Entity
@@ -32,6 +34,7 @@ public class User {
     @Column
     private String profileImg;
 
-    @Column(length = 15)
+    @Column(length = 15, nullable = false, unique = true)
     private String phoneNumber;
+}
 
