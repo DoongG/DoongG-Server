@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -17,16 +16,17 @@ import java.util.List;
 @AllArgsConstructor
 public class PostDTO {
     private Long postId;
-    private String title;
-    private String content;
-    private Integer views;
-    private Integer commentCount;
+    private String title, content;
+    private Integer views, commentCount;
     private User user;
     private Board board;
     private List<CommentDTO> comments;
     private List<PostImageDTO> postImages;
     private List<HashtagDTO> hashtags;
     private Boolean commentAllowed;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private Timestamp createdAt, updatedAt;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
