@@ -10,11 +10,15 @@ import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -40,6 +44,8 @@ public class UserService {
     @Value("${jwt.token.secret}")
     private String key;
     private Long expireTimeMs = 1000L * 60 * 60; // 1시간
+
+    private final MailService mailService;
 
 
     // 이메일 중복체크
@@ -120,4 +126,72 @@ public class UserService {
         return token;
     }
 
+    // 이메일 찾기
+    public String findEmail(String nickname, String phoneNumber) {
+        Optional<User> selectedUser = userRepository.findByNicknameAndPhoneNumber(nickname, phoneNumber);
+
+        // 존재하지 않는 회원
+        if (selectedUser.isEmpty()) {
+            return "false";
+        }
+
+        return selectedUser.get().getEmail();
+    }
+
+    // 비밀번호 재설정
+    public boolean resetPw(String email, String password) {
+        Optional<User> selectedUser = userRepository.findByEmail(email);
+
+        User user = User.builder()
+                .id(selectedUser.get().getId())
+                .uuid(selectedUser.get().getUuid())
+                .email(selectedUser.get().getEmail())
+                .password(bCryptPasswordEncoder.encode(password)) // 비밀번호만 새로 설정
+                .nickname(selectedUser.get().getNickname())
+                .profileImg(selectedUser.get().getProfileImg())
+                .phoneNumber(selectedUser.get().getPhoneNumber())
+                .build();
+
+        userRepository.save(user);
+
+        return true;
+    }
+
+    // 이메일 인증
+    public String sendEmail(String email) {
+        // 해당 이메일로 이미 가입된 유저가 있는지 확인
+        Optional<User> selectedUser = userRepository.findByEmail(email);
+
+        // 이미 가입된 유저가 없는 경우
+        if (selectedUser.isEmpty()) {
+            return "false";
+        }
+
+        // 이메일 인증번호 생성
+        String code = createCode();
+
+        String title = "[둥지] 비밀번호 재설정 인증번호 안내";
+        String content = "자취생들의 안식처 [둥지]의 비밀번호 재설정 인증번호는 [" + code + "] 입니다.";
+
+        mailService.sendEmail(email, title, content);
+
+
+        return code;
+    }
+
+    // 이메일 인증번호 생성
+    private String createCode() {
+        int lenth = 6;
+        try {
+            Random random = SecureRandom.getInstanceStrong();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < lenth; i++) {
+                builder.append(random.nextInt(10));
+            }
+            return builder.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
