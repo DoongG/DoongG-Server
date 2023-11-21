@@ -4,10 +4,7 @@ import com.merge.doongG.dto.*;
 import com.merge.doongG.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor // final이 선언된 모든 필드를 인자값으로 하는 생성자를 생성
@@ -45,5 +42,25 @@ public class UserController {
     public ResponseEntity<String> login(@RequestBody UserLoginDTO dto) {
         String token = userService.login(dto.getEmail(), dto.getPassword());
         return ResponseEntity.ok().body(token); // 토큰 반환
+    }
+
+    @PostMapping("/findEmail") // 이메일 찾기 (/user/findEmail)
+    public ResponseEntity<String> findEmail(@RequestBody FindEmailDTO dto) {
+        String email = userService.findEmail(dto.getNickname(), dto.getPhoneNumber());
+        return ResponseEntity.ok().body(email);
+    }
+
+    // 이메일 인증
+    @PostMapping("/emailAuth")
+    public ResponseEntity<String> emailAuth(@RequestBody EmailAuthDTO dto) {
+        String result = userService.sendEmail(dto.getEmail());
+        return ResponseEntity.ok().body(result);
+    }
+
+    // 비밀번호 재설정
+    @PostMapping("/resetPw")
+    public ResponseEntity<String> resetPw(@RequestBody ResetPwDTO dto) {
+        userService.resetPw(dto.getEmail(), dto.getPassword());
+        return ResponseEntity.ok().body("true");
     }
 }
