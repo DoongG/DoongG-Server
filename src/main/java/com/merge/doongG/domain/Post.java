@@ -56,6 +56,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id") )
     private List<Hashtag> hashtags;
 
+    @Builder.Default
     @Column(columnDefinition = "BIT", nullable = false)
     private Boolean commentAllowed = true;
 
@@ -65,12 +66,14 @@ public class Post {
     @Column(nullable = false)
     private Timestamp updatedAt;
 
-    public Post(String title, String content, Integer views, Board board, User user) {
+
+    public Post(String title, String content, Integer views, Board board, User user, Boolean commentAllowed) {
         this.title = title;
         this.content = content;
         this.views = views;
         this.board = board;
         this.user = user;
+        this.commentAllowed = commentAllowed;
         onCreate();
     }
 

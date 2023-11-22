@@ -126,7 +126,8 @@ public class BoardServiceImpl implements BoardService {
                 postDTO.getContent(),
                 postDTO.getViews(),
                 postDTO.getBoard(),
-                postDTO.getUser()
+                postDTO.getUser(),
+                postDTO.getCommentAllowed()
         );
 
         Post savedPost = postRepository.save(post);
