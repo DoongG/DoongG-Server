@@ -63,4 +63,10 @@ public class UserController {
         userService.resetPw(dto.getEmail(), dto.getPassword());
         return ResponseEntity.ok().body("true");
     }
+    
+    // 회원 정보 수정 - 닉네임 변경
+    
+    // 회원 정보 수정 - 프로필 이미지 변경
+    
+    // 회원 정보 수정 - 비밀번호 변경
 }
