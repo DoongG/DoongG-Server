@@ -1,6 +1,5 @@
 package com.merge.doongG.config;
 
-import com.merge.doongG.exception.ExceptionManager;
 import com.merge.doongG.service.UserService;
 import com.merge.doongG.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -44,7 +43,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰에서 userName 꺼내기
         String userName = JwtUtil.getUserName(token, key);
-
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userName, null, List.of(new SimpleGrantedAuthority("USER")));
