@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Cart {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID cartID;
 
     @OneToOne

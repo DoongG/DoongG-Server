@@ -1,13 +1,12 @@
 package com.merge.doongG.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 
 @Getter
 @Builder
@@ -17,23 +16,33 @@ import lombok.NoArgsConstructor;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productID;
+    private Long productID; // 상품아이디
 
-    private String productName;
+    @Column(nullable = false)
+    private String productName; // 상품명
 
-    private String productImage;
+    @Column(nullable = false)
+    private String productImage; // 상품이미지
 
-    private String productStatus;
+    @Column(nullable = false)
+    private String productDescription; // 상품설명
 
-    private String productDescription;
+    @Column(nullable = false)
+    private String category; // 상품분류
 
-    private String category;
+    @Column(nullable = false)
+    private int stock; // 재고
 
-    private int stock;
+    @Column(nullable = false)
+    private int price; // 가격
 
-    private int price;
+    @Column(nullable = false)
+    private int discountedPrice; // 할인가
 
-    private int discountedPrice;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int viewCount; // 조회수
 
-    private int viewCount;
+    // 생성일자 자동생성
+    @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private Timestamp createdAt;
 }
