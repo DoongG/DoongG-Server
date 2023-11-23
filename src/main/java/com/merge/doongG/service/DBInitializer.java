@@ -23,14 +23,18 @@ public class DBInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        createDefaultBoardIfNotExists();
+        createDefaultBoardsIfNotExist();
         // 아래에 메서드 만들어서 여기에 초기 실행되도록 할 수 있음
     }
 
-    private void createDefaultBoardIfNotExists() {
-        if (boardRepository.findByBoardName("DefaultBoard").isEmpty()) {
-            Board defaultBoard = Board.builder().boardName("DefaultBoard").build();
-            boardRepository.save(defaultBoard);
+    private void createDefaultBoardsIfNotExist() {
+        for (int i = 1; i <= 6; i++) {
+            String boardName = "DefaultBoard" + i;
+            if (boardRepository.findByBoardName(boardName).isEmpty()) {
+                Board defaultBoard = Board.builder().boardName(boardName).build();
+                boardRepository.save(defaultBoard);
+            }
         }
     }
+
 }

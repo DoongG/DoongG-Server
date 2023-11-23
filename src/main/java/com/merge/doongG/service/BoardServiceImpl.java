@@ -4,15 +4,20 @@ import com.merge.doongG.domain.Board;
 import com.merge.doongG.domain.Post;
 import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
+import com.merge.doongG.dto.PostSummaryDTO;
+import com.merge.doongG.dto.UnifiedBoardDTO;
 import com.merge.doongG.repository.BoardRepository;
 import com.merge.doongG.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,11 +26,40 @@ import java.util.stream.Collectors;
 public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
+    private static final List<String> DEFAULT_BOARD_NAMES = Arrays.asList("DefaultBoard1", "DefaultBoard2", "DefaultBoard3", "DefaultBoard4", "DefaultBoard5", "DefaultBoard6");
 
     @Autowired
     public BoardServiceImpl(BoardRepository boardRepository, PostRepository postRepository) {
         this.boardRepository = boardRepository;
         this.postRepository = postRepository;
+    }
+
+    @Override
+    public List<UnifiedBoardDTO> getUnifiedBoards() {
+        List<UnifiedBoardDTO> unifiedBoards = new ArrayList<>();
+
+        for (String boardName : DEFAULT_BOARD_NAMES) {
+            Optional<Board> optionalBoard = boardRepository.findByBoardName(boardName);
+
+            if (optionalBoard.isPresent()) {
+                Board board = optionalBoard.get();
+                Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "createdAt"));
+                Page<Post> posts = postRepository.findByBoardId(board.getBoardId(), pageable);
+
+                List<PostSummaryDTO> postSummaries = posts.getContent().stream()
+                        .map(post -> new PostSummaryDTO(post.getPostId(), post.getTitle(), post.getCreatedAt().toLocalDateTime())).toList();
+
+                UnifiedBoardDTO unifiedBoardDTO = UnifiedBoardDTO.builder()
+                        .boardId(board.getBoardId())
+                        .boardName(board.getBoardName())
+                        .posts(postSummaries)
+                        .build();
+
+                unifiedBoards.add(unifiedBoardDTO);
+            }
+        }
+
+        return unifiedBoards;
     }
 
     @Override

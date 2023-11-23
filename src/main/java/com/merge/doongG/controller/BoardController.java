@@ -1,6 +1,7 @@
 package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.PostDTO;
+import com.merge.doongG.dto.UnifiedBoardDTO;
 import com.merge.doongG.service.BoardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/boards")
 public class BoardController {
     @Autowired
     private BoardService boardService;
+
+    // 통합 게시판
+    @GetMapping
+    public ResponseEntity<List<UnifiedBoardDTO>> getUnifiedBoards() {
+        List<UnifiedBoardDTO> unifiedBoards = boardService.getUnifiedBoards();
+        return ResponseEntity.ok(unifiedBoards);
+    }
 
     // 게시판 (갤러리 유형)
     @GetMapping("/gallery/{boardId}")
