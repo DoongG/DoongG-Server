@@ -2,6 +2,7 @@ package com.merge.doongG.service;
 
 import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
+import com.merge.doongG.dto.UnifiedBoardDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface BoardService {
     void deletePost(Long postId);
 
     long getTotalPosts();
+
+    List<UnifiedBoardDTO> getUnifiedBoards();
 }

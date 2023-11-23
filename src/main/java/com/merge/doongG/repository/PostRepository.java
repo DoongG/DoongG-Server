@@ -27,4 +27,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByBoardIdAndHashtagsContainingIgnoreCaseOrderByViewsDesc(Long boardId, String keyword, Pageable pageable);
 
     Page<Post> findByBoardIdAndContentContainingIgnoreCaseOrderByViewsDesc(Long boardId, String keyword, Pageable pageable);
+
+    Page<Post> findByBoardId(Long boardId, Pageable pageable);
 }
