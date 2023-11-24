@@ -13,6 +13,11 @@ public class JwtUtil {
         return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().get("userName", String.class);
     }
 
+    // JWT에서 uuid 추출
+    public static String getUuid(String token, String key) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().get("uuid", String.class);
+    }
+
     // JWT 만료 여부 확인
     public static boolean isExpired(String token, String key) {
         // 토큰의 만료시간이 현재시간보다 이전인지 확인
