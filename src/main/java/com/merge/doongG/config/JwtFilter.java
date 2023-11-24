@@ -43,11 +43,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰에서 userName 꺼내기
         String userName = JwtUtil.getUserName(token, key);
+        // 토큰에서 uuid 꺼내기
+        String uuid = JwtUtil.getUuid(token, key);
+
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userName, null, List.of(new SimpleGrantedAuthority("USER")));
         // Detail 설정
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        authenticationToken.setDetails(uuid); // 이 값에 접근하기 위해서는 SecurityContextHolder.getContext().getAuthentication().getDetails()로 접근해야 함
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request, response);
     }

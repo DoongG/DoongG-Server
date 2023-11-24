@@ -50,23 +50,15 @@ public class UserController {
         return ResponseEntity.ok().body(email);
     }
 
-    // 이메일 인증
-    @PostMapping("/emailAuth")
+    @PostMapping("/emailAuth") // 이메일 인증 (/user/emailAuth)
     public ResponseEntity<String> emailAuth(@RequestBody EmailAuthDTO dto) {
         String result = userService.sendEmail(dto.getEmail());
         return ResponseEntity.ok().body(result);
     }
 
-    // 비밀번호 재설정
-    @PostMapping("/resetPw")
+    @PostMapping("/resetPw") // 비밀번호 재설정 (/user/resetPw)
     public ResponseEntity<String> resetPw(@RequestBody ResetPwDTO dto) {
         userService.resetPw(dto.getEmail(), dto.getPassword());
         return ResponseEntity.ok().body("true");
     }
-    
-    // 회원 정보 수정 - 닉네임 변경
-    
-    // 회원 정보 수정 - 프로필 이미지 변경
-    
-    // 회원 정보 수정 - 비밀번호 변경
 }

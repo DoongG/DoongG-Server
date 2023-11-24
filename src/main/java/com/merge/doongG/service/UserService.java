@@ -194,4 +194,61 @@ public class UserService {
             return null;
         }
     }
+
+    // 회원 정보 수정 - 닉네임 변경
+    public boolean chNickname(UUID uuid, String nickname) {
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        User user = User.builder()
+                .id(selectedUser.get().getId())
+                .uuid(selectedUser.get().getUuid())
+                .email(selectedUser.get().getEmail())
+                .password(selectedUser.get().getPassword())
+                .nickname(nickname)
+                .profileImg(selectedUser.get().getProfileImg())
+                .phoneNumber(selectedUser.get().getPhoneNumber())
+                .build();
+
+        userRepository.save(user);
+
+        return true;
+    }
+
+    // 회원 정보 수정 - 프로필 이미지 변경
+    public boolean chProImg(UUID uuid, String profileImg) {
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        User user = User.builder()
+                .id(selectedUser.get().getId())
+                .uuid(selectedUser.get().getUuid())
+                .email(selectedUser.get().getEmail())
+                .password(selectedUser.get().getPassword())
+                .nickname(selectedUser.get().getNickname())
+                .profileImg(profileImg)
+                .phoneNumber(selectedUser.get().getPhoneNumber())
+                .build();
+
+        userRepository.save(user);
+
+        return true;
+    }
+
+    // 회원 정보 수정 - 비밀번호 변경
+    public boolean chPw(UUID uuid, String password) {
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        User user = User.builder()
+                .id(selectedUser.get().getId())
+                .uuid(selectedUser.get().getUuid())
+                .email(selectedUser.get().getEmail())
+                .password(bCryptPasswordEncoder.encode(password)) //
+                .nickname(selectedUser.get().getNickname())
+                .profileImg(selectedUser.get().getProfileImg())
+                .phoneNumber(selectedUser.get().getPhoneNumber())
+                .build();
+
+        userRepository.save(user);
+
+        return true;
+    }
 }

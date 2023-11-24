@@ -1,15 +1,14 @@
 package com.merge.doongG.service;
 
 import com.merge.doongG.domain.Product;
-import com.merge.doongG.dto.BestProductDTO;
-import com.merge.doongG.dto.GetAllProductDTO;
-import com.merge.doongG.dto.NewProductDTO;
+import com.merge.doongG.dto.*;
 import com.merge.doongG.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,8 +55,8 @@ public class ShopService {
         return bestProductDTOS;
     }
 
-    public List<GetAllProductDTO> getAll() {
-        List<Product> allProducts = shopRepository.findAll();
+    public List<GetAllProductDTO> getAll(String category) {
+        List<Product> allProducts = shopRepository.findAllByCategory(category);
         List<GetAllProductDTO> getAllProductDTOS = new ArrayList<>();
 
         for (Product product : allProducts) {
@@ -75,5 +74,39 @@ public class ShopService {
         }
 
         return getAllProductDTOS;
+    }
+
+    // 상품 하나 조회
+    public GetOneDTO getOne(Long productId) {
+        shopRepository.updateViewCount(productId);
+        Optional<Product> product = shopRepository.findByProductID(productId);
+
+        // ReviewDTO 배열 만들기
+        List<ReviewDTO> reviews = new ArrayList<>();
+        for (int i = 0; i < product.get().getReviews().size(); i++) {
+            ReviewDTO reviewDTO = ReviewDTO.builder()
+                    .nickname(product.get().getReviews().get(i).getUser().getNickname()) // 작성자
+                    .content(product.get().getReviews().get(i).getContent()) // 내용
+                    .createdAt(product.get().getReviews().get(i).getCreatedAt().toString()) // 작성일자
+                    .build();
+            reviews.add(reviewDTO);
+        }
+
+        // GetOneDTO 만들기
+        GetOneDTO getOneDTO = GetOneDTO.builder()
+                .productID(product.get().getProductID())
+                .productName(product.get().getProductName())
+                .productImage(product.get().getProductImage())
+                .productDescription(product.get().getProductDescription())
+                .category(product.get().getCategory())
+                .stock(product.get().getStock())
+                .price(product.get().getPrice())
+                .discountedPrice(product.get().getDiscountedPrice())
+                .viewCount(product.get().getViewCount())
+                .createdAt(product.get().getCreatedAt().toString())
+                .reviews(reviews)
+                .build();
+
+        return getOneDTO;
     }
 }
