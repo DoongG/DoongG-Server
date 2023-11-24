@@ -23,7 +23,7 @@ public class PostDTO {
     private List<CommentDTO> comments;
     private List<PostImageDTO> postImages;
     private List<HashtagDTO> hashtags;
-    private Boolean commentAllowed;
+    private String commentAllowed;
     private Timestamp createdAt, updatedAt;
 
     public void setUser(User user) {

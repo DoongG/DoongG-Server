@@ -31,8 +31,13 @@ public class DBInitializer implements CommandLineRunner {
         for (int i = 1; i <= 6; i++) {
             String boardName = "DefaultBoard" + i;
             if (boardRepository.findByBoardName(boardName).isEmpty()) {
-                Board defaultBoard = Board.builder().boardName(boardName).build();
-                boardRepository.save(defaultBoard);
+                if (i % 2 == 1) {
+                    Board defaultBoard = Board.builder().boardName(boardName).boardDefaultType("gallery").build();
+                    boardRepository.save(defaultBoard);
+                } else {
+                    Board defaultBoard = Board.builder().boardName(boardName).boardDefaultType("list").build();
+                    boardRepository.save(defaultBoard);
+                }
             }
         }
     }

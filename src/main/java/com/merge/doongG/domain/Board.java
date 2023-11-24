@@ -19,8 +19,8 @@ public class Board {
     @Column(nullable = false, unique = true)
     private String boardName;
 
-//    @Column(nullable = false)
-//    private String boardDefaultType;
+    @Column(nullable = false)
+    private String boardDefaultType;
 
     public void changeBoardName(String newBoardName) {
         this.boardName = newBoardName;

@@ -26,9 +26,37 @@ public class Reaction {
 
     @Builder.Default
     @Column(nullable = false)
-    private Integer good = 0;
+    private boolean liked = false;
 
     @Builder.Default
     @Column(nullable = false)
-    private Integer bad = 0;
+    private boolean disliked = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer likes = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer dislikes = 0;
+
+    public void like() {
+        this.liked = true;
+        this.likes++;
+    }
+
+    public void dislike() {
+        this.disliked = true;
+        this.dislikes++;
+    }
+
+    public void undoLike() {
+        this.liked = false;
+        this.likes--;
+    }
+
+    public void undoDislike() {
+        this.disliked = false;
+        this.dislikes--;
+    }
 }

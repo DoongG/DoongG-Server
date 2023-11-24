@@ -52,6 +52,7 @@ public class BoardServiceImpl implements BoardService {
                 UnifiedBoardDTO unifiedBoardDTO = UnifiedBoardDTO.builder()
                         .boardId(board.getBoardId())
                         .boardName(board.getBoardName())
+                        .boardDefaultType(board.getBoardDefaultType())
                         .posts(postSummaries)
                         .build();
 
