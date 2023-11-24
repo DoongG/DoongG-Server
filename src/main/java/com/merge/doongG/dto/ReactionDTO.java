@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardDTO {
-    private Long boardId;
-    private String boardName;
-    private String boardDefaultType;
+public class ReactionDTO {
+    private Long postId;
+    private Long userId;
+    private boolean liked;
+    private boolean disliked;
+    private Integer likes;
+    private Integer dislikes;
 }

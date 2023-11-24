@@ -10,5 +10,6 @@ import java.util.List;
 public class UnifiedBoardDTO {
     private Long boardId;
     private String boardName;
+    private String boardDefaultType;
     private List<PostSummaryDTO> posts;
 }

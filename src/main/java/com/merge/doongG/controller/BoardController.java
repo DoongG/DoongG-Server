@@ -1,8 +1,10 @@
 package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.PostDTO;
+import com.merge.doongG.dto.ReactionDTO;
 import com.merge.doongG.dto.UnifiedBoardDTO;
 import com.merge.doongG.service.BoardService;
+import com.merge.doongG.service.ReactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,8 @@ import java.util.List;
 public class BoardController {
     @Autowired
     private BoardService boardService;
+    @Autowired
+    private ReactionService reactionService;
 
     // 통합 게시판
     @GetMapping
@@ -46,8 +50,7 @@ public class BoardController {
             @RequestParam(defaultValue = "latest") String order,
             @RequestParam(defaultValue = "title") String category,
             @RequestParam(defaultValue = "12") int pageSize,
-            @RequestParam(defaultValue = "1") int page
-    ) {
+            @RequestParam(defaultValue = "1") int page) {
         Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
         return ResponseEntity.ok(posts);
     }
@@ -58,8 +61,7 @@ public class BoardController {
             @PathVariable Long boardId,
             @RequestParam(defaultValue = "latest") String order,
             @RequestParam(defaultValue = "16") int pageSize,
-            @RequestParam(defaultValue = "1") int page
-    ) {
+            @RequestParam(defaultValue = "1") int page) {
         Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
         long totalPosts = boardService.getTotalPosts();
 
@@ -77,8 +79,7 @@ public class BoardController {
             @RequestParam(defaultValue = "latest") String order,
             @RequestParam(defaultValue = "title") String category,
             @RequestParam(defaultValue = "16") int pageSize,
-            @RequestParam(defaultValue = "1") int page
-    ) {
+            @RequestParam(defaultValue = "1") int page) {
         Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
         return ResponseEntity.ok(posts);
     }
@@ -101,8 +102,7 @@ public class BoardController {
     @PostMapping("/update/{postId}")
     public ResponseEntity<PostDTO> updatePost(
             @PathVariable Long postId,
-            @RequestBody PostDTO postDTO
-    ) {
+            @RequestBody PostDTO postDTO) {
         PostDTO updatedPost = boardService.updatePost(postId, postDTO);
         log.info("Received PostDTO: {}", postDTO);
         return ResponseEntity.ok(updatedPost);
@@ -113,5 +113,25 @@ public class BoardController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         boardService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // 좋아요
+    @PostMapping("/like")
+    public ResponseEntity<ReactionDTO> likePost(@RequestBody ReactionDTO request) {
+        ReactionDTO reactionDTO = reactionService.likePost(request.getPostId(), request.getUserId());
+        return new ResponseEntity<>(reactionDTO, HttpStatus.OK);
+    }
+
+    // 싫어요
+    @PostMapping("/dislike")
+    public ResponseEntity<ReactionDTO> dislikePost(@RequestBody ReactionDTO request) {
+        ReactionDTO reactionDTO = reactionService.dislikePost(request.getPostId(), request.getUserId());
+        return new ResponseEntity<>(reactionDTO, HttpStatus.OK);
+    }
+
+    // 리액션 받아오기
+    @GetMapping("/getReaction")
+    public ReactionDTO getReactionsByPostId(@RequestParam Long postId, @RequestParam Long userId) {
+        return reactionService.getReactionsByPostId(postId, userId);
     }
 }
