@@ -64,6 +64,13 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    public String getBoardDefaultType(String boardName) {
+        Optional<Board> board = boardRepository.findByBoardName(boardName);
+        return board.map(Board::getBoardDefaultType)
+                .orElse("default");
+    }
+
+    @Override
     public List<BoardDTO> getAllBoards() {
         List<Board> boards = boardRepository.findAll();
         return boards.stream()
@@ -98,13 +105,13 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Page<PostDTO> getBoard(Long boardId, String order, int pageSize, int page) {
+    public Page<PostDTO> getBoard(String boardName, String order, int pageSize, int page) {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
         Page<Post> posts;
         if ("latest".equalsIgnoreCase(order)) {
-            posts = postRepository.findByBoardIdOrderByCreatedAtDesc(boardId, pageable);
+            posts = postRepository.findByBoardBoardNameOrderByCreatedAtDesc(boardName, pageable);
         } else {
-            posts = postRepository.findByBoardIdOrderByViewsDesc(boardId, pageable);
+            posts = postRepository.findByBoardBoardNameOrderByViewsDesc(boardName, pageable);
         }
         return posts.map(this::convertToDTO);
     }
