@@ -14,7 +14,7 @@ public interface BoardService {
     BoardDTO updateBoard(Long boardId, String newBoardName);
     void deleteBoard(Long boardId);
 
-    Page<PostDTO> getBoard(Long boardId, String order, int pageSize, int page);
+    Page<PostDTO> getBoard(String boardName, String order, int pageSize, int page);
     Page<PostDTO> searchBoard(Long boardId, String keyword, String order, String category, int page, int pageSize);
 
     PostDTO getPost(Long postId);
@@ -25,4 +25,6 @@ public interface BoardService {
     long getTotalPosts();
 
     List<UnifiedBoardDTO> getUnifiedBoards();
+
+    String getBoardDefaultType(String boardName);
 }

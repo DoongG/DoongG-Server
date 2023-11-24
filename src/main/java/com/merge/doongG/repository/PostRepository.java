@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findByBoardIdOrderByCreatedAtDesc(Long boardId, Pageable pageable);
+    Page<Post> findByBoardBoardNameOrderByCreatedAtDesc(String boardName, Pageable pageable);
 
-    Page<Post> findByBoardIdOrderByViewsDesc(Long boardId, Pageable pageable);
+    Page<Post> findByBoardBoardNameOrderByViewsDesc(String boardName, Pageable pageable);
 
     Page<Post> findByBoardIdAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(Long boardId, String keyword, Pageable pageable);
 

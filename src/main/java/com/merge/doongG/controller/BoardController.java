@@ -1,5 +1,6 @@
 package com.merge.doongG.controller;
 
+import com.merge.doongG.dto.BoardResponseDTO;
 import com.merge.doongG.dto.PostDTO;
 import com.merge.doongG.dto.ReactionDTO;
 import com.merge.doongG.dto.UnifiedBoardDTO;
@@ -31,16 +32,35 @@ public class BoardController {
         return ResponseEntity.ok(unifiedBoards);
     }
 
-    // 게시판 (갤러리 유형)
-    @GetMapping("/gallery/{boardId}")
-    public ResponseEntity<Page<PostDTO>> getGalleryBoard(
-            @PathVariable Long boardId,
+    @GetMapping("/{boardName}")
+    public ResponseEntity<BoardResponseDTO> getBoard(
+            @PathVariable String boardName,
             @RequestParam(defaultValue = "latest") String order,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(defaultValue = "1") int page) {
-        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
-        return ResponseEntity.ok(posts);
+        Page<PostDTO> posts = boardService.getBoard(boardName, order, pageSize, page);
+
+        String boardType = boardService.getBoardDefaultType(boardName);
+
+        BoardResponseDTO responseDTO = BoardResponseDTO.builder()
+                .boardName(boardName)
+                .boardDefaultType(boardType)
+                .posts(posts.getContent())
+                .build();
+
+        return ResponseEntity.ok(responseDTO);
     }
+
+    // 게시판 (갤러리 유형)
+//    @GetMapping("/gallery/{boardId}")
+//    public ResponseEntity<Page<PostDTO>> getGalleryBoard(
+//            @PathVariable Long boardId,
+//            @RequestParam(defaultValue = "latest") String order,
+//            @RequestParam(defaultValue = "12") int pageSize,
+//            @RequestParam(defaultValue = "1") int page) {
+//        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
+//        return ResponseEntity.ok(posts);
+//    }
 
     // 게시판 검색 (갤러리 유형)
     @GetMapping("/gallery/{boardId}/search")
@@ -56,20 +76,20 @@ public class BoardController {
     }
 
     // 게시판 (리스트 유형)
-    @GetMapping("/list/{boardId}")
-    public ResponseEntity<Page<PostDTO>> getListBoard(
-            @PathVariable Long boardId,
-            @RequestParam(defaultValue = "latest") String order,
-            @RequestParam(defaultValue = "16") int pageSize,
-            @RequestParam(defaultValue = "1") int page) {
-        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
-        long totalPosts = boardService.getTotalPosts();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Posts-Total-Count", String.valueOf(totalPosts));
-
-        return new ResponseEntity<>(posts, headers, HttpStatus.OK);
-    }
+//    @GetMapping("/list/{boardId}")
+//    public ResponseEntity<Page<PostDTO>> getListBoard(
+//            @PathVariable Long boardId,
+//            @RequestParam(defaultValue = "latest") String order,
+//            @RequestParam(defaultValue = "16") int pageSize,
+//            @RequestParam(defaultValue = "1") int page) {
+//        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
+//        long totalPosts = boardService.getTotalPosts();
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Posts-Total-Count", String.valueOf(totalPosts));
+//
+//        return new ResponseEntity<>(posts, headers, HttpStatus.OK);
+//    }
 
     // 게시판 검색 (리스트 유형)
     @GetMapping("/list/{boardId}/search")
@@ -85,7 +105,7 @@ public class BoardController {
     }
 
     // 게시물 하나 가져오기
-    @GetMapping("/{postId}")
+    @GetMapping("posts/{postId}")
     public ResponseEntity<PostDTO> getPost(@PathVariable Long postId) {
         PostDTO post = boardService.getPost(postId);
         return ResponseEntity.ok(post);
