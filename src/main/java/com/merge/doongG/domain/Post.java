@@ -27,8 +27,8 @@ public class Post {
     @Column(name = "board_id", insertable = false, updatable = false)
     private Long boardId;
 
-    @ManyToOne
-    @JoinColumn(name = "poster_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Builder.Default
@@ -39,15 +39,18 @@ public class Post {
     @Column(length = 10000, nullable = false)
     private String content = "";
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer views = 0;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer commentCount = 0;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Reaction> reactions = new ArrayList<>();
 
@@ -60,25 +63,15 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id") )
     private List<Hashtag> hashtags;
 
+    @Builder.Default
     @Column(nullable = false)
-    private String commentAllowed;
+    private String commentAllowed = "true";
 
     @Column(nullable = false)
     private Timestamp createdAt;
 
     @Column(nullable = false)
     private Timestamp updatedAt;
-
-
-    public Post(String title, String content, Integer views, Board board, User user, String commentAllowed) {
-        this.title = title;
-        this.content = content;
-        this.views = views;
-        this.board = board;
-        this.user = user;
-        this.commentAllowed = commentAllowed;
-        onCreate();
-    }
 
     @PrePersist
     protected void onCreate() {
@@ -88,5 +81,17 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
+
+    public void incrementCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decrementCommentCount() {
+        this.commentCount--;
+    }
+
+    public void incrementViews() {
+        this.views++;
     }
 }

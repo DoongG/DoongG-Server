@@ -11,12 +11,12 @@ import java.sql.Timestamp;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
+public class CommentResponseDTO {
     private Long commentId;
     private PostDTO post;
-    private UserDTO commenter;
-    private CommentDTO parentComment;
+    private UserSummaryDTO commenter;
+    private Long parentCommentId;
     private String content;
-    private Timestamp createAt;
-    private Timestamp updateAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 }
