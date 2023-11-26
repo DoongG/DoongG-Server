@@ -4,6 +4,7 @@ import com.merge.doongG.dto.BoardDTO;
 import com.merge.doongG.dto.PostDTO;
 import com.merge.doongG.dto.UnifiedBoardDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,4 +28,7 @@ public interface BoardService {
     List<UnifiedBoardDTO> getUnifiedBoards();
 
     String getBoardDefaultType(String boardName);
+
+    @Transactional
+    void incrementPostViews(Long postId);
 }

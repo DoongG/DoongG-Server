@@ -1,16 +1,11 @@
 package com.merge.doongG.controller;
 
-import com.merge.doongG.dto.BoardResponseDTO;
-import com.merge.doongG.dto.PostDTO;
-import com.merge.doongG.dto.ReactionDTO;
-import com.merge.doongG.dto.UnifiedBoardDTO;
+import com.merge.doongG.dto.*;
 import com.merge.doongG.service.BoardService;
 import com.merge.doongG.service.ReactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +15,14 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/boards")
 public class BoardController {
+    private final BoardService boardService;
+    private final ReactionService reactionService;
+
     @Autowired
-    private BoardService boardService;
-    @Autowired
-    private ReactionService reactionService;
+    public BoardController(BoardService boardService, ReactionService reactionService) {
+        this.boardService = boardService;
+        this.reactionService = reactionService;
+    }
 
     // 통합 게시판
     @GetMapping
@@ -32,6 +31,7 @@ public class BoardController {
         return ResponseEntity.ok(unifiedBoards);
     }
 
+    // 게시판 렌더링
     @GetMapping("/{boardName}")
     public ResponseEntity<BoardResponseDTO> getBoard(
             @PathVariable String boardName,
@@ -104,49 +104,12 @@ public class BoardController {
         return ResponseEntity.ok(posts);
     }
 
-    // 게시물 하나 가져오기
+    // 게시물 상세 페이지
     @GetMapping("posts/{postId}")
     public ResponseEntity<PostDTO> getPost(@PathVariable Long postId) {
         PostDTO post = boardService.getPost(postId);
+        boardService.incrementPostViews(postId);
         return ResponseEntity.ok(post);
-    }
-
-    // 게시물 작성
-    @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) {
-        PostDTO createdPost = boardService.createPost(postDTO);
-        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
-    }
-
-    // 게시물 수정
-    @PostMapping("/update/{postId}")
-    public ResponseEntity<PostDTO> updatePost(
-            @PathVariable Long postId,
-            @RequestBody PostDTO postDTO) {
-        PostDTO updatedPost = boardService.updatePost(postId, postDTO);
-        log.info("Received PostDTO: {}", postDTO);
-        return ResponseEntity.ok(updatedPost);
-    }
-
-    // 게시물 삭제
-    @PostMapping("/delete/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
-        boardService.deletePost(postId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    // 좋아요
-    @PostMapping("/like")
-    public ResponseEntity<ReactionDTO> likePost(@RequestBody ReactionDTO request) {
-        ReactionDTO reactionDTO = reactionService.likePost(request.getPostId(), request.getUserId());
-        return new ResponseEntity<>(reactionDTO, HttpStatus.OK);
-    }
-
-    // 싫어요
-    @PostMapping("/dislike")
-    public ResponseEntity<ReactionDTO> dislikePost(@RequestBody ReactionDTO request) {
-        ReactionDTO reactionDTO = reactionService.dislikePost(request.getPostId(), request.getUserId());
-        return new ResponseEntity<>(reactionDTO, HttpStatus.OK);
     }
 
     // 리액션 받아오기

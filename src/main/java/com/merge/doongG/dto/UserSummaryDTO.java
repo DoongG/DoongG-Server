@@ -1,18 +1,16 @@
 package com.merge.doongG.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-public class UserDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserSummaryDTO {
     private Long id;
-    private UUID uuid;
-    private String email;
-    private String password;
     private String nickname;
     private String profileImg;
-    private String phoneNumber;
 }
