@@ -1,17 +1,15 @@
 package com.merge.doongG.controller;
 
-import com.merge.doongG.dto.ChNicknameDTO;
-import com.merge.doongG.dto.ChProImgDTO;
-import com.merge.doongG.dto.ChPwDTO;
+import com.merge.doongG.dto.*;
+import com.merge.doongG.service.CartService;
 import com.merge.doongG.service.UserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +17,15 @@ import java.util.UUID;
 @RequestMapping("/userAuth")
 public class UserAuthController {
     private final UserService userService;
+    private final CartService cartSerivce;
+
+    @GetMapping
+    public ResponseEntity<MyPageDTO> myPage() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        MyPageDTO result = userService.myPage(uuid);
+
+        return ResponseEntity.ok().body(result);
+    }
 
     @PostMapping("/chNick") // 닉네임 변경 (/user/updateNickname)
     public ResponseEntity<String> chNick(@RequestBody ChNicknameDTO dto) {
@@ -45,5 +52,14 @@ public class UserAuthController {
         userService.chPw(uuid, password);
 
         return ResponseEntity.ok().body("true");
+    }
+
+    // 장바구니 조회 (/userAuth/getCart)
+    @PostMapping("/getCart")
+    public ResponseEntity<List<GetCartDTO>> getCart() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        List<GetCartDTO> result = cartSerivce.getCart(uuid);
+
+        return ResponseEntity.ok().body(result);
     }
 }

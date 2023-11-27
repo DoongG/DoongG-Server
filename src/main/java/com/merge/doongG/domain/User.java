@@ -36,5 +36,9 @@ public class User {
 
     @Column(length = 15, nullable = false, unique = true)
     private String phoneNumber;
+
+    // 장바구니 연결
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Cart cart;
 }
 
