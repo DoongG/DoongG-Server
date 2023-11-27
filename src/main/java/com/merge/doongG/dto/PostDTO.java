@@ -17,12 +17,12 @@ import java.util.List;
 public class PostDTO {
     private Long postId;
     private String title, content;
-    private Integer views, commentCount;
+    private Integer views, commentCount, likeCount;
     private UserSummaryDTO user;
     private Board board;
     private List<CommentResponseDTO> comments = new ArrayList<>();
-    private List<PostImageDTO> postImages;
-    private List<HashtagDTO> hashtags;
+    private List<PostImageDTO> postImages = new ArrayList<>();
+    private List<HashtagDTO> hashtags = new ArrayList<>();
     private String commentAllowed;
     private Timestamp createdAt, updatedAt;
 
