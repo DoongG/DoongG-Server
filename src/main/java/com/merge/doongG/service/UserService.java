@@ -1,6 +1,11 @@
 package com.merge.doongG.service;
 
+import com.merge.doongG.domain.Cart;
+import com.merge.doongG.domain.Product;
 import com.merge.doongG.domain.User;
+import com.merge.doongG.dto.GetCartDTO;
+import com.merge.doongG.dto.MyPageDTO;
+import com.merge.doongG.repository.CartRepository;
 import com.merge.doongG.repository.UserRepository;
 import com.merge.doongG.utils.JwtUtil;
 import jakarta.annotation.PostConstruct;
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -40,6 +46,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CartService cartService;
+    private final CartRepository cartRepository;
 
     @Value("${jwt.token.secret}")
     private String key;
@@ -101,6 +109,9 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+
+        // 유저 회원가입 하면, 해당 유저의 장바구니 생성
+        cartService.createCart(user);
 
         return true;
     }
@@ -250,5 +261,18 @@ public class UserService {
         userRepository.save(user);
 
         return true;
+    }
+
+    public MyPageDTO myPage(UUID uuid) {
+        // 해당 uuid로 유저 찾기
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        MyPageDTO myPageDTO = MyPageDTO.builder()
+                .nickname(selectedUser.get().getNickname())
+                .profileImg(selectedUser.get().getProfileImg())
+                .email(selectedUser.get().getEmail())
+                .build();
+
+        return myPageDTO;
     }
 }
