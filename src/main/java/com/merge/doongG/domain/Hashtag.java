@@ -18,9 +18,9 @@ public class Hashtag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hashtagId;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String hashtagName;
 
-    @ManyToMany(mappedBy = "hashtags")
+    @ManyToMany(mappedBy = "hashtags", cascade = CascadeType.PERSIST)
     private List<Post> posts;
 }

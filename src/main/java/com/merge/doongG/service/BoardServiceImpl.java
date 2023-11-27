@@ -1,13 +1,8 @@
 package com.merge.doongG.service;
 
-import com.merge.doongG.domain.Board;
-import com.merge.doongG.domain.Comment;
-import com.merge.doongG.domain.Post;
-import com.merge.doongG.domain.User;
+import com.merge.doongG.domain.*;
 import com.merge.doongG.dto.*;
-import com.merge.doongG.repository.BoardRepository;
-import com.merge.doongG.repository.PostRepository;
-import com.merge.doongG.repository.UserRepository;
+import com.merge.doongG.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,14 +21,16 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final HashtagRepository hashtagRepository;
     private static final List<String> DEFAULT_BOARD_NAMES = Arrays.asList("DefaultBoard1", "DefaultBoard2", "DefaultBoard3", "DefaultBoard4", "DefaultBoard5", "DefaultBoard6");
 
     @Autowired
     public BoardServiceImpl(BoardRepository boardRepository, PostRepository postRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository, HashtagRepository hashtagRepository) {
         this.boardRepository = boardRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.hashtagRepository = hashtagRepository;
     }
 
     // 통합 게시판 정보 가져오기
@@ -177,51 +174,85 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public PostDTO createPost(PostDTO postDTO) {
         Long userId = postDTO.getUser().getId();
-
         UserSummaryDTO userSummary = findUserSummaryById(userId);
 
-        if (userSummary != null) {
-            Post post = convertToEntity(postDTO);
-            Post savedPost = postRepository.save(post);
-
-            return convertToDTO(savedPost);
-        } else {
+        if (userSummary == null) {
             return null;
         }
+
+        Post post = convertToEntity(postDTO);
+
+        List<Hashtag> hashtags = postDTO.getHashtags().stream()
+                .map(this::convertToEntity)
+                .collect(Collectors.toList());
+
+        List<PostImage> postImages = new ArrayList<>();
+
+        for (PostImageDTO postImageDTO : postDTO.getPostImages()) {
+            PostImage postImage = convertToEntity(postImageDTO, post);
+            postImages.add(postImage);
+        }
+
+        post = Post.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .views(post.getViews())
+                .commentCount(post.getCommentCount())
+                .user(post.getUser())
+                .board(post.getBoard())
+                .comments(post.getComments())
+                .commentAllowed(post.getCommentAllowed())
+                .hashtags(hashtags)
+                .postImages(postImages)
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        Post savedPost = postRepository.save(post);
+
+        return convertToDTO(savedPost);
     }
 
     // 게시물 수정
     @Override
     public PostDTO updatePost(Long postId, PostDTO postDTO) {
-        Optional<Post> post = postRepository.findById(postId);
+        Optional<Post> postOptional = postRepository.findById(postId);
 
-        if (post.isPresent()) {
-            Post existingPost = post.get();
+        if (postOptional.isPresent()) {
+            Post existingPost = postOptional.get();
 
-            UserSummaryDTO userDTO = new UserSummaryDTO(
-                    existingPost.getUser().getId(),
-                    existingPost.getUser().getNickname(),
-                    existingPost.getUser().getProfileImg()
-            );
+            UserSummaryDTO userDTO = postDTO.getUser();
+            if (userDTO == null) {
+                userDTO = new UserSummaryDTO();
+            }
 
-            PostDTO updatedPostDTO = PostDTO.builder()
+            List<Hashtag> updatedHashtags = postDTO.getHashtags().stream()
+                    .map(this::convertToEntity)
+                    .collect(Collectors.toList());
+
+            List<PostImage> updatedPostImages = postDTO.getPostImages().stream()
+                    .map(postImageDTO -> convertToEntity(postImageDTO, existingPost))
+                    .collect(Collectors.toList());
+
+            Post updatedPost = Post.builder()
                     .postId(existingPost.getPostId())
                     .title(postDTO.getTitle())
                     .content(postDTO.getContent())
                     .views(existingPost.getViews())
                     .commentCount(existingPost.getCommentCount())
-                    .user(userDTO)
+                    .user(existingPost.getUser())
                     .board(existingPost.getBoard())
-                    .comments(postDTO.getComments())
-                    .postImages(postDTO.getPostImages())
-                    .hashtags(postDTO.getHashtags())
+                    .comments(existingPost.getComments())
+                    .postImages(updatedPostImages)
+                    .hashtags(updatedHashtags)
                     .commentAllowed(postDTO.getCommentAllowed())
                     .createdAt(existingPost.getCreatedAt())
                     .updatedAt(new Timestamp(System.currentTimeMillis()))
                     .build();
 
-            Post updatedPost = postRepository.save(convertToEntity(updatedPostDTO));
-            return convertToDTO(updatedPost);
+            Post savedPost = postRepository.save(updatedPost);
+
+            return convertToDTO(savedPost, userDTO);
         }
 
         return null;
@@ -275,7 +306,12 @@ public class BoardServiceImpl implements BoardService {
     private PostDTO convertToDTO(Post post) {
         UserSummaryDTO userDTO = convertToDTO(post.getUser());
 
-        List<CommentResponseDTO> commentDTOs = convertToDTO(post.getComments());
+        List<CommentResponseDTO> commentDTOs = convertCommentsToDTO(post.getComments());
+        List<HashtagDTO> hashtagDTOs = convertHashtagsToDTO(post.getHashtags());
+        List<PostImageDTO> postImageDTOs = convertImagesToDTO(post.getPostImages());
+
+        int likeCount = (int) post.getReactions().stream().filter(Reaction::isLiked).count();
+
 
         return PostDTO.builder()
                 .postId(post.getPostId())
@@ -287,13 +323,34 @@ public class BoardServiceImpl implements BoardService {
                 .board(post.getBoard())
                 .comments(commentDTOs)
                 .commentAllowed(post.getCommentAllowed())
+                .likeCount(likeCount)
+                .hashtags(hashtagDTOs)
+                .postImages(postImageDTOs)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
 
+    private List<PostImageDTO> convertImagesToDTO(List<PostImage> postImages) {
+        return postImages.stream()
+                .map(postImage -> PostImageDTO.builder()
+                        .url(postImage.getUrl())
+                        .description(postImage.getDescription())
+                        .imageType(postImage.getImageType())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<HashtagDTO> convertHashtagsToDTO(List<Hashtag> hashtags) {
+        return hashtags.stream()
+                .map(hashtag -> HashtagDTO.builder()
+                        .hashtagName(hashtag.getHashtagName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     // Comment 리스트를 DTO 리스트로 변환
-    private List<CommentResponseDTO> convertToDTO(List<Comment> comments) {
+    private List<CommentResponseDTO> convertCommentsToDTO(List<Comment> comments) {
         List<CommentResponseDTO> commentDTOs = new ArrayList<>();
         for (Comment comment : comments) {
             CommentResponseDTO commentDTO = convertToDTO(comment);
@@ -315,7 +372,7 @@ public class BoardServiceImpl implements BoardService {
                 .build();
     }
 
-    // User를 UserSummaryDTO로 변혼
+    // User를 UserSummaryDTO로 변환
     private UserSummaryDTO convertToDTO(User user) {
         if (user == null) {
             return null;
@@ -324,6 +381,55 @@ public class BoardServiceImpl implements BoardService {
         return UserSummaryDTO.builder()
                 .nickname(user.getNickname())
                 .profileImg(user.getProfileImg())
+                .build();
+    }
+
+    // PostImage를 PostImageDTO로 변환
+    private PostImageDTO convertToDTO(PostImage postImage) {
+        return PostImageDTO.builder()
+                .url(postImage.getUrl())
+                .description(postImage.getDescription())
+                .imageType(postImage.getImageType())
+                .build();
+    }
+
+    // Hashtag를 HashtagDTO로 변환
+    private HashtagDTO convertToDTO(Hashtag hashtag) {
+        if (hashtag == null) {
+            return null;
+        }
+        return HashtagDTO.builder()
+                .hashtagName(hashtag.getHashtagName())
+                .build();
+    }
+
+    private PostDTO convertToDTO(Post post, UserSummaryDTO userDTO) {
+        List<CommentResponseDTO> commentDTOs = post.getComments().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        List<PostImageDTO> postImageDTOs = post.getPostImages().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        List<HashtagDTO> hashtagDTOs = post.getHashtags().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return PostDTO.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .views(post.getViews())
+                .commentCount(post.getCommentCount())
+                .user(userDTO)
+                .board(post.getBoard())
+                .comments(commentDTOs)
+                .postImages(postImageDTOs)
+                .hashtags(hashtagDTOs)
+                .commentAllowed(post.getCommentAllowed())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
 
@@ -376,6 +482,35 @@ public class BoardServiceImpl implements BoardService {
                 .id(commenter.getId())
                 .nickname(commenter.getNickname())
                 .profileImg(commenter.getProfileImg())
+                .build();
+    }
+
+    // Hashtag를 엔터티로 변환
+    private Hashtag convertToEntity(HashtagDTO hashtagDTO) {
+        if (hashtagDTO == null || !StringUtils.hasText(hashtagDTO.getHashtagName())) {
+            return null;
+        }
+
+        String hashtagName = hashtagDTO.getHashtagName();
+
+        // 이미 존재하는 해시태그인지 확인
+        Optional<Hashtag> existingHashtag = hashtagRepository.findByHashtagName(hashtagName);
+
+        // 이미 존재하는 경우에는 기존 해시태그를, 존재하지 않는 경우에는 새로운 해시태그를 생성하여 반환
+        return existingHashtag.orElseGet(() -> {
+            // 저장된 Hashtag 엔터티를 반환하도록 변경
+            return hashtagRepository.save(Hashtag.builder()
+                    .hashtagName(hashtagName)
+                    .build());
+        });
+    }
+
+    private PostImage convertToEntity(PostImageDTO postImageDTO, Post post) {
+        return PostImage.builder()
+                .url(postImageDTO.getUrl())
+                .description(postImageDTO.getDescription())
+                .imageType(postImageDTO.getImageType())
+                .post(post)
                 .build();
     }
 }
