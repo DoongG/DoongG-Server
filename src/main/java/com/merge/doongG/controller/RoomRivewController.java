@@ -1,6 +1,7 @@
 package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.GetRoomRivewDTO;
+import com.merge.doongG.dto.MyRoomRivewDTO;
 import com.merge.doongG.dto.WriteRoomRivewDTO;
 import com.merge.doongG.service.RoomRivewService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,13 @@ public class RoomRivewController {
         UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
         roomRivewService.roomRivewWrite(uuid, dto);
         return ResponseEntity.ok().body("true");
+    }
+
+    // 내가 쓴 자취방 리뷰 조회
+    @GetMapping("/MyRoomRivew")
+    public ResponseEntity<List<MyRoomRivewDTO>> getMyRoomRivew() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        List<MyRoomRivewDTO> result = roomRivewService.getMyRoomRivew(uuid);
+        return ResponseEntity.ok().body(result);
     }
 }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Getter
 @Builder
 @Entity
@@ -36,4 +38,8 @@ public class RoomRivew {
     // 리뷰 내용
     @Column(nullable = false)
     private String content;
+
+    // 생성일자 자동생성
+    @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private Timestamp createdAt;
 }
