@@ -17,4 +17,5 @@ public class GetCartDTO {
     private int price; // 상품 가격
     private int discountedPrice; // 할인 가격
     private int quantity; // 상품 수량
+    private String createdAt; // 생성일자
 }
