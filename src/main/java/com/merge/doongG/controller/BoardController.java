@@ -6,6 +6,7 @@ import com.merge.doongG.service.ReactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,76 +46,59 @@ public class BoardController {
         BoardResponseDTO responseDTO = BoardResponseDTO.builder()
                 .boardName(boardName)
                 .boardDefaultType(boardType)
+                .postCount(posts.getTotalElements())
                 .posts(posts.getContent())
                 .build();
 
         return ResponseEntity.ok(responseDTO);
     }
 
-    // 게시판 (갤러리 유형)
-//    @GetMapping("/gallery/{boardId}")
-//    public ResponseEntity<Page<PostDTO>> getGalleryBoard(
-//            @PathVariable Long boardId,
-//            @RequestParam(defaultValue = "latest") String order,
-//            @RequestParam(defaultValue = "12") int pageSize,
-//            @RequestParam(defaultValue = "1") int page) {
-//        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
-//        return ResponseEntity.ok(posts);
-//    }
-
-    // 게시판 검색 (갤러리 유형)
-    @GetMapping("/gallery/{boardId}/search")
-    public ResponseEntity<Page<PostDTO>> searchGalleryBoard(
-            @PathVariable Long boardId,
+    // 게시물 검색
+    @GetMapping("/search/{boardName}")
+    public ResponseEntity<BoardResponseDTO> searchPosts(
+            @PathVariable String boardName,
             @RequestParam String keyword,
+            @RequestParam(defaultValue = "full") String searchType,
             @RequestParam(defaultValue = "latest") String order,
-            @RequestParam(defaultValue = "title") String category,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(defaultValue = "1") int page) {
-        Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
-        return ResponseEntity.ok(posts);
-    }
+        Page<PostDTO> searchedPosts = boardService.searchPosts(boardName, keyword, order, pageSize, page, searchType);
 
-    // 게시판 (리스트 유형)
-//    @GetMapping("/list/{boardId}")
-//    public ResponseEntity<Page<PostDTO>> getListBoard(
-//            @PathVariable Long boardId,
-//            @RequestParam(defaultValue = "latest") String order,
-//            @RequestParam(defaultValue = "16") int pageSize,
-//            @RequestParam(defaultValue = "1") int page) {
-//        Page<PostDTO> posts = boardService.getBoard(boardId, order, pageSize, page);
-//        long totalPosts = boardService.getTotalPosts();
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Posts-Total-Count", String.valueOf(totalPosts));
-//
-//        return new ResponseEntity<>(posts, headers, HttpStatus.OK);
-//    }
+        String boardType = boardService.getBoardDefaultType(boardName);
 
-    // 게시판 검색 (리스트 유형)
-    @GetMapping("/list/{boardId}/search")
-    public ResponseEntity<Page<PostDTO>> searchListBoard(
-            @PathVariable Long boardId,
-            @RequestParam String keyword,
-            @RequestParam(defaultValue = "latest") String order,
-            @RequestParam(defaultValue = "title") String category,
-            @RequestParam(defaultValue = "16") int pageSize,
-            @RequestParam(defaultValue = "1") int page) {
-        Page<PostDTO> posts = boardService.searchBoard(boardId, keyword, order, category, page, pageSize);
-        return ResponseEntity.ok(posts);
+        BoardResponseDTO responseDTO = BoardResponseDTO.builder()
+                .boardName(boardName)
+                .boardDefaultType(boardType)
+                .posts(searchedPosts.getContent())
+                .build();
+
+        return ResponseEntity.ok(responseDTO);
     }
 
     // 게시물 상세 페이지
-    @GetMapping("posts/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<PostDTO> getPost(@PathVariable Long postId) {
         PostDTO post = boardService.getPost(postId);
-        boardService.incrementPostViews(postId);
         return ResponseEntity.ok(post);
+    }
+
+    // 조회 수 증가
+    @PostMapping("/posts/increaseViews/{postId}")
+    public ResponseEntity<Void> increasePostViews(@PathVariable Long postId) {
+        boardService.incrementPostViews(postId);
+        return ResponseEntity.ok().build();
     }
 
     // 리액션 받아오기
     @GetMapping("/getReaction")
     public ReactionDTO getReactionsByPostId(@RequestParam Long postId, @RequestParam Long userId) {
         return reactionService.getReactionsByPostId(postId, userId);
+    }
+
+    // carousel을 위한 좋아요 수 탑10 게시물 받아오기
+    @GetMapping("/topLiked/{boardName}")
+    public ResponseEntity<List<PostDTO>> getTopLikedPosts(@PathVariable String boardName) {
+        List<PostDTO> topLikedPosts = boardService.getTopLikedPosts(boardName);
+        return new ResponseEntity<>(topLikedPosts, HttpStatus.OK);
     }
 }

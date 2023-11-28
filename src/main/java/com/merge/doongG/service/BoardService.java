@@ -16,19 +16,25 @@ public interface BoardService {
     void deleteBoard(Long boardId);
 
     Page<PostDTO> getBoard(String boardName, String order, int pageSize, int page);
-    Page<PostDTO> searchBoard(Long boardId, String keyword, String order, String category, int page, int pageSize);
+
+    Page<PostDTO> searchPosts(String boardName, String keyword, String order, int pageSize, int page, String searchType);
+
 
     PostDTO getPost(Long postId);
     PostDTO createPost(PostDTO postDTO);
     PostDTO updatePost(Long postId, PostDTO postDTO);
     void deletePost(Long postId);
 
-    long getTotalPosts();
-
     List<UnifiedBoardDTO> getUnifiedBoards();
 
     String getBoardDefaultType(String boardName);
 
+    // 전체 게시물 수 가져오기
+    long getTotalPosts(String boardname);
+
     @Transactional
     void incrementPostViews(Long postId);
+
+    // 지난 주 좋아요 Top 10
+    List<PostDTO> getTopLikedPosts(String boardName);
 }

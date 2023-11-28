@@ -15,4 +15,5 @@ public class BoardResponseDTO {
     private String boardName;
     private String boardDefaultType;
     private List<PostDTO> posts;
+    private Long postCount;
 }
