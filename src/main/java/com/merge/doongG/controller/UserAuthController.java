@@ -3,7 +3,6 @@ package com.merge.doongG.controller;
 import com.merge.doongG.dto.*;
 import com.merge.doongG.service.CartService;
 import com.merge.doongG.service.UserService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
