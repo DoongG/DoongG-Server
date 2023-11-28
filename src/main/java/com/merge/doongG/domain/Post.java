@@ -1,10 +1,7 @@
 package com.merge.doongG.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -12,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +34,7 @@ public class Post {
     private String title = "";
 
     @Builder.Default
-    @Column(length = 10000, nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content = "";
 
     @Builder.Default
@@ -73,6 +71,12 @@ public class Post {
     @Column(nullable = false)
     private Timestamp updatedAt;
 
+    @Column(columnDefinition = "TEXT", length = 15000)
+    private String fullTextSearch;
+
+    @Column
+    private int likeCount;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = this.updatedAt = new Timestamp(System.currentTimeMillis());
@@ -91,7 +95,19 @@ public class Post {
         this.commentCount--;
     }
 
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decrementLikeCount() {
+        this.likeCount--;
+    }
+
     public void incrementViews() {
         this.views++;
+    }
+
+    public void updateFullTextSearch() {
+        this.fullTextSearch = title + " " + content + " " + getUser().getNickname();
     }
 }

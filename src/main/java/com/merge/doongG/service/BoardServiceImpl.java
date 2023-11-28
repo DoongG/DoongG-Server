@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,44 +124,43 @@ public class BoardServiceImpl implements BoardService {
         return posts.map(this::convertToDTO);
     }
 
-    // 게시판에서 특정 키워드로 검색
+    // 게시물 검색
     @Override
-    public Page<PostDTO> searchBoard(Long boardId, String keyword, String order, String category, int page, int pageSize) {
+    public Page<PostDTO> searchPosts(String boardName, String keyword, String order, int pageSize, int page, String searchType) {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
         Page<Post> posts;
 
         if (StringUtils.hasText(keyword)) {
-            if ("latest".equalsIgnoreCase(order)) {
-                posts = switch (category.toLowerCase()) {
-                    case "title" ->
-                            postRepository.findByBoardIdAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
-                    case "author" ->
-                            postRepository.findByBoardIdAndUserNicknameContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
-                    case "hashtag" ->
-                            postRepository.findByBoardIdAndHashtagsContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
-                    case "content" ->
-                            postRepository.findByBoardIdAndContentContainingIgnoreCaseOrderByCreatedAtDesc(boardId, keyword, pageable);
-                    default -> Page.empty();
-                };
-            } else if ("views".equalsIgnoreCase(order)) {
-                posts = switch (category.toLowerCase()) {
-                    case "title" ->
-                            postRepository.findByBoardIdAndTitleContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
-                    case "author" ->
-                            postRepository.findByBoardIdAndUserNicknameContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
-                    case "hashtag" ->
-                            postRepository.findByBoardIdAndHashtagsContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
-                    case "content" ->
-                            postRepository.findByBoardIdAndContentContainingIgnoreCaseOrderByViewsDesc(boardId, keyword, pageable);
-                    default -> Page.empty();
-                };
-            } else {
-                posts = Page.empty();
-            }} else {
+            posts = switch (order.toLowerCase()) {
+                case "latest" -> findByKeywordAndOrderLatest(boardName, keyword, searchType, pageable);
+                case "views" -> findByKeywordAndOrderViews(boardName, keyword, searchType, pageable);
+                default -> Page.empty();
+            };
+        } else {
             posts = Page.empty();
         }
 
         return posts.map(this::convertToDTO);
+    }
+
+    private Page<Post> findByKeywordAndOrderLatest(String boardName, String keyword, String searchType, Pageable pageable) {
+        return switch (searchType.toLowerCase()) {
+            case "full" -> postRepository.findByBoardBoardNameAndFullTextSearchContainingIgnoreCaseOrderByCreatedAtDesc(boardName, keyword, pageable);
+            case "title" -> postRepository.findByBoardBoardNameAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(boardName, keyword, pageable);
+            case "author" -> postRepository.findByBoardBoardNameAndUserNicknameContainingIgnoreCaseOrderByCreatedAtDesc(boardName, keyword, pageable);
+            case "content" -> postRepository.findByBoardBoardNameAndContentContainingIgnoreCaseOrderByCreatedAtDesc(boardName, keyword, pageable);
+            default -> Page.empty();
+        };
+    }
+
+    private Page<Post> findByKeywordAndOrderViews(String boardName, String keyword, String searchType, Pageable pageable) {
+        return switch (searchType.toLowerCase()) {
+            case "full" -> postRepository.findByBoardBoardNameAndFullTextSearchContainingIgnoreCaseOrderByViewsDesc(boardName, keyword, pageable);
+            case "title" -> postRepository.findByBoardBoardNameAndTitleContainingIgnoreCaseOrderByViewsDesc(boardName, keyword, pageable);
+            case "author" -> postRepository.findByBoardBoardNameAndUserNicknameContainingIgnoreCaseOrderByViewsDesc(boardName, keyword, pageable);
+            case "content" -> postRepository.findByBoardBoardNameAndContentContainingIgnoreCaseOrderByViewsDesc(boardName, keyword, pageable);
+            default -> Page.empty();
+        };
     }
 
     // 특정 게시물을 가져오기 (게시물 상세 페이지)
@@ -172,7 +172,9 @@ public class BoardServiceImpl implements BoardService {
 
     // 게시물 생성
     @Override
+    @Transactional
     public PostDTO createPost(PostDTO postDTO) {
+        System.out.println("createPost method is called.");
         Long userId = postDTO.getUser().getId();
         UserSummaryDTO userSummary = findUserSummaryById(userId);
 
@@ -181,35 +183,29 @@ public class BoardServiceImpl implements BoardService {
         }
 
         Post post = convertToEntity(postDTO);
+        post.updateFullTextSearch();
 
         List<Hashtag> hashtags = postDTO.getHashtags().stream()
-                .map(this::convertToEntity)
-                .collect(Collectors.toList());
+                .map(this::convertToEntity).toList();
 
-        List<PostImage> postImages = new ArrayList<>();
+        List<PostImage> postImages = postDTO.getPostImages().stream()
+                .map(postImageDTO -> convertToEntity(postImageDTO, post)).toList();
 
-        for (PostImageDTO postImageDTO : postDTO.getPostImages()) {
-            PostImage postImage = convertToEntity(postImageDTO, post);
-            postImages.add(postImage);
-        }
+        post.setPostId(postDTO.getPostId());
+        post.setTitle(postDTO.getTitle());
+        post.setContent(postDTO.getContent());
+        post.setViews(postDTO.getViews());
+        post.setCommentAllowed(postDTO.getCommentAllowed());
+        post.setBoard(postDTO.getBoard());
+        post.setHashtags(hashtags);
+        post.setPostImages(postImages);
+        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-        post = Post.builder()
-                .postId(post.getPostId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .views(post.getViews())
-                .commentCount(post.getCommentCount())
-                .user(post.getUser())
-                .board(post.getBoard())
-                .comments(post.getComments())
-                .commentAllowed(post.getCommentAllowed())
-                .hashtags(hashtags)
-                .postImages(postImages)
-                .createdAt(new Timestamp(System.currentTimeMillis()))
-                .build();
-
+        // 저장된 엔터티를 반환
         Post savedPost = postRepository.save(post);
+        System.out.println("createPost method execution completed.");
 
+        // 저장된 엔터티를 다시 DTO로 변환
         return convertToDTO(savedPost);
     }
 
@@ -220,6 +216,7 @@ public class BoardServiceImpl implements BoardService {
 
         if (postOptional.isPresent()) {
             Post existingPost = postOptional.get();
+            existingPost.updateFullTextSearch();
 
             UserSummaryDTO userDTO = postDTO.getUser();
             if (userDTO == null) {
@@ -266,8 +263,8 @@ public class BoardServiceImpl implements BoardService {
 
     // 전체 게시물 수 가져오기
     @Override
-    public long getTotalPosts() {
-        return postRepository.count();
+    public long getTotalPosts(String boardname) {
+        return postRepository.countByBoardBoardName(boardname);
     }
 
     // 게시물 조회수 증가
@@ -281,6 +278,18 @@ public class BoardServiceImpl implements BoardService {
             post.incrementViews();
             postRepository.save(post);
         }
+    }
+
+    // 지난 주 좋아요 Top 10
+    @Override
+    public List<PostDTO> getTopLikedPosts(String boardName) {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+
+        List<Post> topLikedPosts = postRepository.findTopLikedPosts(boardName, oneWeekAgo, PageRequest.of(0, 10));
+
+        return topLikedPosts.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     // 유저 아이디로 UserSummaryDTO 찾기
@@ -311,7 +320,7 @@ public class BoardServiceImpl implements BoardService {
         List<PostImageDTO> postImageDTOs = convertImagesToDTO(post.getPostImages());
 
         int likeCount = (int) post.getReactions().stream().filter(Reaction::isLiked).count();
-
+        int dislikeCount = (int) post.getReactions().stream().filter(Reaction::isDisliked).count();
 
         return PostDTO.builder()
                 .postId(post.getPostId())
@@ -324,6 +333,7 @@ public class BoardServiceImpl implements BoardService {
                 .comments(commentDTOs)
                 .commentAllowed(post.getCommentAllowed())
                 .likeCount(likeCount)
+                .dislikeCount(dislikeCount)
                 .hashtags(hashtagDTOs)
                 .postImages(postImageDTOs)
                 .createdAt(post.getCreatedAt())

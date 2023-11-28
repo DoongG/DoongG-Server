@@ -43,13 +43,16 @@ public class ReactionServiceImpl implements ReactionService {
                     .build();
 
             newReaction.like();
+            post.incrementLikeCount();
             reactionRepository.save(newReaction);
         } else {
             if (!existingReaction.isLiked()) {
                 existingReaction.like();
+                post.incrementLikeCount();
                 reactionRepository.save(existingReaction);
             } else {
                 existingReaction.undoLike();
+                post.decrementLikeCount();
                 reactionRepository.save(existingReaction);
             }
         }

@@ -71,6 +71,7 @@ public class CommentServiceImpl implements CommentService {
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
                 .post(existingComment.getPost())
                 .commenter(existingUser)
+                .parentComment(existingComment.getParentComment())
                 .build();
 
         commentRepository.save(updatedComment);
