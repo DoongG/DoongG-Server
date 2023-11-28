@@ -40,9 +40,13 @@ public class CartService {
                     .price(cart.getCartDetails().get(i).getProduct().getPrice())
                     .discountedPrice(cart.getCartDetails().get(i).getProduct().getDiscountedPrice())
                     .quantity(cart.getCartDetails().get(i).getQuantity())
+                    .createdAt(cart.getCartDetails().get(i).getCreatedAt().toString())
                     .build();
             list.add(getCartDTO);
         }
+
+        // 생성일자 기준으로 최신순 정렬
+        list.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
 
         return list;
     }
