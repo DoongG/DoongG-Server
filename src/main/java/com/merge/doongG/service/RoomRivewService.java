@@ -47,14 +47,25 @@ public class RoomRivewService {
 
     // 자취방 리뷰 작성
     public boolean roomRivewWrite(UUID uuid, WriteRoomRivewDTO dto) {
+        boolean flag = false; // 같은 주소로 작성된 리뷰가 있는지 확인
+
         // uuid로 유저 찾기
         Optional<User> user = userRepository.findByUuid(uuid);
 
+        // 주소로 이미 작성한 리뷰가 있는지 확인
+        List<RoomRivew> list = roomRivewRepository.findByAddress(dto.getAddress());
+
+        if (list.size() > 0) {
+            flag = true; // 같은 주소로 작성된 리뷰가 있으면 true로 변경
+        }
+
+        // 요청 들어온 주소로 엔티티 생성
+        // 같은 주소로 작성된 리뷰가 존재한다면, 먼저 작성된 리뷰의 위도와 경도로 설정
         RoomRivew roomRivew = RoomRivew.builder()
                 .user(user.get())
                 .address(dto.getAddress())
-                .latitude(dto.getLatitude())
-                .longitude(dto.getLongitude())
+                .latitude(flag ? list.get(0).getLatitude() : dto.getLatitude())
+                .longitude(flag ? list.get(0).getLongitude() : dto.getLongitude())
                 .content(dto.getContent())
                 .build();
 
