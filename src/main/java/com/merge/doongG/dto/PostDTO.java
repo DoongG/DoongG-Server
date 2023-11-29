@@ -20,8 +20,14 @@ public class PostDTO {
     private Integer views, commentCount, likeCount, dislikeCount;
     private UserSummaryDTO user;
     private Board board;
+
+    @Builder.Default
     private List<CommentResponseDTO> comments = new ArrayList<>();
+
+    @Builder.Default
     private List<PostImageDTO> postImages = new ArrayList<>();
+
+    @Builder.Default
     private List<HashtagDTO> hashtags = new ArrayList<>();
     private String commentAllowed;
     private Timestamp createdAt, updatedAt;

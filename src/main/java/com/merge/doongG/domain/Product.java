@@ -49,6 +49,7 @@ public class Product {
     private Timestamp createdAt;
 
     // 해당 상품의 리뷰 배열
+    @Builder.Default
     @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 }
