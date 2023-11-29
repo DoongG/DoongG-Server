@@ -16,6 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity // Spring Security 활성화
 @RequiredArgsConstructor
@@ -36,6 +38,16 @@ public class SecurityConfig {
         return http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
+                // cors 설정 허용
+                .cors(config -> {
+                    config.configurationSource(request -> {
+                        var cors = new org.springframework.web.cors.CorsConfiguration();
+                        cors.setAllowedOrigins(List.of("*"));
+                        cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        cors.setAllowedHeaders(List.of("*"));
+                        return cors;
+                    });
+                })
                 .formLogin(AbstractHttpConfigurer::disable) // 기본 로그인 페이지 없애기
                 .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 페이지 없애기
                 .authorizeRequests()
