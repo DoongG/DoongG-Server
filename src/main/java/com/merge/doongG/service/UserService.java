@@ -1,9 +1,6 @@
 package com.merge.doongG.service;
 
-import com.merge.doongG.domain.Cart;
-import com.merge.doongG.domain.Product;
 import com.merge.doongG.domain.User;
-import com.merge.doongG.dto.GetCartDTO;
 import com.merge.doongG.dto.MyPageDTO;
 import com.merge.doongG.repository.CartRepository;
 import com.merge.doongG.repository.UserRepository;
@@ -11,18 +8,13 @@ import com.merge.doongG.utils.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
