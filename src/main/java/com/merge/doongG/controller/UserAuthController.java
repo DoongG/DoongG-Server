@@ -61,4 +61,13 @@ public class UserAuthController {
 
         return ResponseEntity.ok().body(result);
     }
+
+    // 장바구니 추가 (/userAuth/addCart)
+    @PostMapping("/addCart")
+    public ResponseEntity<String> addCart(@RequestBody AddCartDTO dto) {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        cartSerivce.addCart(uuid, dto.getProductID(), dto.getQuantity());
+
+        return ResponseEntity.ok().body("true");
+    }
 }

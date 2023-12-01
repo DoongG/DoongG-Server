@@ -1,20 +1,25 @@
 package com.merge.doongG.service;
 
 import com.merge.doongG.domain.Cart;
+import com.merge.doongG.domain.CartDetail;
+import com.merge.doongG.domain.Product;
 import com.merge.doongG.domain.User;
 import com.merge.doongG.dto.GetCartDTO;
 import com.merge.doongG.repository.CartRepository;
+import com.merge.doongG.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CartService {
     private final CartRepository cartRepository;
+    private final ShopRepository productRepository;
 
     // 장바구니 생성
     public void createCart(User user) {
@@ -49,5 +54,26 @@ public class CartService {
         list.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
 
         return list;
+    }
+
+    public String addCart(UUID uuid, Long productID, int quantity) {
+        // uuid로 장바구니 찾기
+        Cart cart = cartRepository.findByUserUuid(uuid);
+
+        // productID로 상품 찾기
+        Optional<Product> product = productRepository.findByProductID(productID);
+
+        // 장바구니에 상품 추가
+        CartDetail cartDetail = CartDetail.builder()
+                .cart(cart)
+                .product(product.get())
+                .quantity(quantity)
+                .build();
+
+        cart.getCartDetails().add(cartDetail);
+
+        cartRepository.save(cart);
+
+        return "true";
     }
 }
