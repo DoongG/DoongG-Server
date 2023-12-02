@@ -1,6 +1,7 @@
 package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.*;
+import com.merge.doongG.service.BoardService;
 import com.merge.doongG.service.CartService;
 import com.merge.doongG.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class UserAuthController {
     private final UserService userService;
     private final CartService cartSerivce;
+    private final BoardService boardService;
 
     @GetMapping
     public ResponseEntity<MyPageDTO> myPage() {
@@ -69,5 +71,21 @@ public class UserAuthController {
         cartSerivce.addCart(uuid, dto.getProductID(), dto.getQuantity());
 
         return ResponseEntity.ok().body("true");
+    }
+
+    // 내가 작성한 글 조회 (/userAuth/myPosts)
+    @GetMapping("/myPosts")
+    public ResponseEntity<List<PostDTO>> getMyPosts() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        List<PostDTO> result = boardService.getMyPosts(uuid);
+        return ResponseEntity.ok().body(result);
+    }
+
+    // 내가 좋아요 표시한 글 조회
+    @GetMapping("/myLikedPosts")
+    public ResponseEntity<List<PostDTO>> getMyLikedPosts() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        List<PostDTO> result = boardService.getMyLikedPosts(uuid);
+        return ResponseEntity.ok().body(result);
     }
 }

@@ -2,7 +2,6 @@ package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.*;
 import com.merge.doongG.service.BoardService;
-import com.merge.doongG.service.ReactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,12 +16,10 @@ import java.util.List;
 @RequestMapping("/boards")
 public class BoardController {
     private final BoardService boardService;
-    private final ReactionService reactionService;
 
     @Autowired
-    public BoardController(BoardService boardService, ReactionService reactionService) {
+    public BoardController(BoardService boardService) {
         this.boardService = boardService;
-        this.reactionService = reactionService;
     }
 
     // 통합 게시판
@@ -87,12 +84,6 @@ public class BoardController {
     public ResponseEntity<Void> increasePostViews(@PathVariable Long postId) {
         boardService.incrementPostViews(postId);
         return ResponseEntity.ok().build();
-    }
-
-    // 리액션 받아오기
-    @GetMapping("/getReaction")
-    public ReactionDTO getReactionsByPostId(@RequestParam Long postId, @RequestParam Long userId) {
-        return reactionService.getReactionsByPostId(postId, userId);
     }
 
     // carousel을 위한 좋아요 수 탑10 게시물 받아오기

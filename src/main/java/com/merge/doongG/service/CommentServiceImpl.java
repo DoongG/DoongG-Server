@@ -4,17 +4,18 @@ import com.merge.doongG.domain.Comment;
 import com.merge.doongG.domain.Post;
 import com.merge.doongG.domain.User;
 import com.merge.doongG.dto.CommentRequestDTO;
-import com.merge.doongG.dto.UserSummaryDTO;
 import com.merge.doongG.repository.CommentRepository;
 import com.merge.doongG.repository.PostRepository;
 import com.merge.doongG.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -33,13 +34,13 @@ public class CommentServiceImpl implements CommentService {
     // 댓글 추가
     @Override
     @Transactional
-    public void addComment(Long postId, CommentRequestDTO commentDTO) {
+    public void addComment(Long postId, CommentRequestDTO commentDTO, UUID uuid) {
         Optional<Post> postOptional = postRepository.findById(postId);
+        Optional<User> userOptional = userRepository.findByUuid(uuid);
 
-        if (postOptional.isPresent()) {
+        if (postOptional.isPresent() && userOptional.isPresent()) {
             Post post = postOptional.get();
-            UserSummaryDTO currentUser = getCurrentUserById(commentDTO.getCommenterId());
-            User commenter = convertUserSummaryToUser(currentUser);
+            User commenter = userOptional.get();
 
             Comment comment = Comment.builder()
                     .content(commentDTO.getContent())
@@ -53,80 +54,80 @@ public class CommentServiceImpl implements CommentService {
             post.incrementCommentCount();
             postRepository.save(post);
         } else {
-            throw new NotFoundException("Post not found");
+            throw new NotFoundException("Post or User not found");
         }
     }
 
     // 댓글 수정
     @Override
     @Transactional
-    public void updateComment(Long commentId, CommentRequestDTO commentDTO) {
-        Comment existingComment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));User existingUser = existingComment.getCommenter();
+    public void updateComment(Long commentId, CommentRequestDTO commentDTO, UUID uuid) {
+        Optional<Comment> existingCommentOptional = commentRepository.findById(commentId);
+        Optional<User> existingUserOptional = userRepository.findByUuid(uuid);
 
-        Comment updatedComment = Comment.builder()
-                .commentId(existingComment.getCommentId())
-                .content(commentDTO.getContent())
-                .createdAt(existingComment.getCreatedAt())
-                .updatedAt(new Timestamp(System.currentTimeMillis()))
-                .post(existingComment.getPost())
-                .commenter(existingUser)
-                .parentComment(existingComment.getParentComment())
-                .build();
+        if (existingCommentOptional.isPresent() && existingUserOptional.isPresent()) {
+            Comment existingComment = existingCommentOptional.get();
+            User existingUser = existingUserOptional.get();
 
-        commentRepository.save(updatedComment);
+            if (existingComment.getCommenter().equals(existingUser)) {
+                Comment updatedComment = Comment.builder()
+                        .commentId(existingComment.getCommentId())
+                        .content(commentDTO.getContent())
+                        .createdAt(existingComment.getCreatedAt())
+                        .updatedAt(new Timestamp(System.currentTimeMillis()))
+                        .post(existingComment.getPost())
+                        .commenter(existingUser)
+                        .parentComment(existingComment.getParentComment())
+                        .build();
+
+                commentRepository.save(updatedComment);
+            } else {
+                throw new AccessDeniedException("이 댓글을 수정할 권한이 없습니다");
+            }
+        } else {
+            throw new NotFoundException("Comment or User not found");
+        }
     }
 
     // 댓글 삭제
     @Override
     @Transactional
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long commentId, UUID uuid) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        Post post = comment.getPost();
-        post.decrementCommentCount();
-        commentRepository.deleteById(commentId);
+        if (comment.getCommenter().getUuid().equals(uuid)) {
+            Post post = comment.getPost();
+            post.decrementCommentCount();
+            commentRepository.deleteById(commentId);
+        } else {
+            throw new AccessDeniedException("이 댓글을 삭제할 권한이 없습니다");
+        }
     }
-
     // 대댓글 작성
     @Override
     @Transactional
-    public void addReply(Long parentCommentId, CommentRequestDTO replyDTO) {
+    public void addReply(Long parentCommentId, CommentRequestDTO replyDTO, UUID uuid) {
         Comment parentComment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new RuntimeException("Parent comment not found"));
 
-        UserSummaryDTO currentUser = getCurrentUserById(replyDTO.getCommenterId());
+        Optional<User> userOptional = userRepository.findByUuid(uuid);
 
-        User commenter = convertUserSummaryToUser(currentUser);
+        if (userOptional.isPresent()) {
+            User commenter = userOptional.get();
 
-        Comment reply = Comment.builder()
-                .content(replyDTO.getContent())
-                .createdAt(new Timestamp(System.currentTimeMillis()))
-                .post(parentComment.getPost())  // Set the post property
-                .commenter(commenter)
-                .parentComment(parentComment)
-                .build();
+            Comment reply = Comment.builder()
+                    .content(replyDTO.getContent())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .post(parentComment.getPost())
+                    .commenter(commenter)
+                    .parentComment(parentComment)
+                    .build();
 
-        parentComment.getPost().incrementCommentCount();
-        commentRepository.save(reply);
-    }
-
-    private User convertUserSummaryToUser(UserSummaryDTO currentUser) {
-        return User.builder()
-                .id(currentUser.getId())
-                .nickname(currentUser.getNickname())
-                .profileImg(currentUser.getProfileImg())
-                .build();
-    }
-
-    private UserSummaryDTO getCurrentUserById(Long userId) {
-        User user = userRepository.findById(userId).orElse(null);
-
-        if (user != null) {
-            return new UserSummaryDTO(user.getId(), user.getNickname(), user.getProfileImg());
+            parentComment.getPost().incrementCommentCount();
+            commentRepository.save(reply);
         } else {
-            return null;
+            throw new NotFoundException("User not found");
         }
     }
 }
