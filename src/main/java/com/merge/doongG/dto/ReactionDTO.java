@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReactionDTO {
     private Long postId;
-    private Long userId;
     private boolean liked;
     private boolean disliked;
     private Integer likes;

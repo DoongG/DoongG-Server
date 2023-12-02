@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -43,4 +44,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "AND p.createdAt >= :oneWeekAgo " +
             "ORDER BY SIZE(p.reactions) DESC")
     List<Post> findTopLikedPosts(@Param("boardName") String boardName, @Param("oneWeekAgo") LocalDateTime oneWeekAgo, PageRequest pageable);
+
+    List<Post> findByUser_Uuid(UUID uuid);
+
+    boolean existsByPostIdAndUser_Uuid(Long postId, UUID uuid);
 }

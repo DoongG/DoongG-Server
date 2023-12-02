@@ -18,7 +18,7 @@ public class PostDTO {
     private Long postId;
     private String title, content;
     private Integer views, commentCount, likeCount, dislikeCount;
-    private UserSummaryDTO user;
+
     private Board board;
 
     @Builder.Default
@@ -29,10 +29,7 @@ public class PostDTO {
 
     @Builder.Default
     private List<HashtagDTO> hashtags = new ArrayList<>();
+
     private String commentAllowed;
     private Timestamp createdAt, updatedAt;
-
-    public void setUser(UserSummaryDTO user) {
-        this.user = user;
-    }
 }
