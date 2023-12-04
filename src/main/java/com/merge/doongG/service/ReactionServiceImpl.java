@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class ReactionServiceImpl implements ReactionService {
 
@@ -29,71 +32,83 @@ public class ReactionServiceImpl implements ReactionService {
 
     @Override
     @Transactional
-    public ReactionDTO likePost(Long postId, Long userId) {
+    public ReactionDTO likePost(Long postId, UUID uuid) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        Optional<User> userOptional = userRepository.findByUuid(uuid);
 
-        Reaction existingReaction = reactionRepository.findByPostAndUser(post, user).orElse(null);
+        if (userOptional.isPresent()) {
+            Reaction existingReaction = reactionRepository.findByPostAndUser(post, userOptional).orElse(null);
 
-        if (existingReaction == null) {
-            Reaction newReaction = Reaction.builder()
-                    .post(post)
-                    .user(user)
-                    .liked(true)
-                    .build();
+            User user = userOptional.get();
 
-            newReaction.like();
-            post.incrementLikeCount();
-            reactionRepository.save(newReaction);
-        } else {
-            if (!existingReaction.isLiked()) {
-                existingReaction.like();
+            if (existingReaction == null) {
+                Reaction newReaction = Reaction.builder()
+                        .post(post)
+                        .user(user)
+                        .liked(true)
+                        .build();
+
+                newReaction.like();
                 post.incrementLikeCount();
-                reactionRepository.save(existingReaction);
+                reactionRepository.save(newReaction);
             } else {
-                existingReaction.undoLike();
-                post.decrementLikeCount();
-                reactionRepository.save(existingReaction);
+                if (!existingReaction.isLiked()) {
+                    existingReaction.like();
+                    post.incrementLikeCount();
+                    reactionRepository.save(existingReaction);
+                } else {
+                    existingReaction.undoLike();
+                    post.decrementLikeCount();
+                    reactionRepository.save(existingReaction);
+                }
             }
-        }
 
-        return getReactionsByPostId(postId, userId);
+            return getReactionsByPostId(postId, uuid);
+        } else {
+            throw new UserNotFoundException("User not found");
+        }
     }
 
     @Override
     @Transactional
-    public ReactionDTO dislikePost(Long postId, Long userId) {
+    public ReactionDTO dislikePost(Long postId, UUID uuid) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        Optional<User> userOptional = userRepository.findByUuid(uuid);
 
-        Reaction existingReaction = reactionRepository.findByPostAndUser(post, user).orElse(null);
+        if (userOptional.isPresent()) {
+            Reaction existingReaction = reactionRepository.findByPostAndUser(post, userOptional).orElse(null);
 
-        if (existingReaction == null) {
-            Reaction newReaction = Reaction.builder()
-                    .post(post)
-                    .user(user)
-                    .disliked(true)
-                    .build();
+            User user = userOptional.get();
 
-            newReaction.dislike();
-            reactionRepository.save(newReaction);
-        } else {
-            if (!existingReaction.isDisliked()) {
-                existingReaction.dislike();
-                reactionRepository.save(existingReaction);
+            if (existingReaction == null) {
+                Reaction newReaction = Reaction.builder()
+                        .post(post)
+                        .user(user)
+                        .disliked(true)
+                        .build();
+
+                newReaction.dislike();
+                reactionRepository.save(newReaction);
             } else {
-                existingReaction.undoDislike();
-                reactionRepository.save(existingReaction);
+                if (!existingReaction.isDisliked()) {
+                    existingReaction.dislike();
+                    reactionRepository.save(existingReaction);
+                } else {
+                    existingReaction.undoDislike();
+                    reactionRepository.save(existingReaction);
+                }
             }
-        }
 
-        return getReactionsByPostId(postId, userId);
+            return getReactionsByPostId(postId, uuid);
+        } else {
+            throw new UserNotFoundException("User not found");
+        }
     }
 
     @Override
-    public ReactionDTO getReactionsByPostId(Long postId, Long userId) {
+    public ReactionDTO getReactionsByPostId(Long postId, UUID uuid) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<User> user = userRepository.findByUuid(uuid);
 
         Reaction userReaction = reactionRepository.findByPostAndUser(post, user).orElse(null);
 

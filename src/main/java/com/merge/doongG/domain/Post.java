@@ -49,7 +49,7 @@ public class Post {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
 
     @Builder.Default
@@ -108,7 +108,7 @@ public class Post {
         this.views++;
     }
 
-    public void updateFullTextSearch() {
-        this.fullTextSearch = title + " " + content + " " + getUser().getNickname();
+    public void updateFullTextSearch(String nickname) {
+        this.fullTextSearch = title + " " + content + " " + nickname;
     }
 }

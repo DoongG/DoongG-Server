@@ -3,14 +3,18 @@ package com.merge.doongG.service;
 import com.merge.doongG.domain.*;
 import com.merge.doongG.dto.*;
 import com.merge.doongG.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.webjars.NotFoundException;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -173,25 +177,20 @@ public class BoardServiceImpl implements BoardService {
     // 게시물 생성
     @Override
     @Transactional
-    public PostDTO createPost(PostDTO postDTO) {
-        System.out.println("createPost method is called.");
-        Long userId = postDTO.getUser().getId();
-        UserSummaryDTO userSummary = findUserSummaryById(userId);
-
-        if (userSummary == null) {
-            return null;
-        }
-
+    public PostDTO createPost(PostDTO postDTO, UUID uuid) {
         Post post = convertToEntity(postDTO);
-        post.updateFullTextSearch();
+        post.updateFullTextSearch(userRepository.findByUuid(uuid).get().getNickname());
 
         List<Hashtag> hashtags = postDTO.getHashtags().stream()
-                .map(this::convertToEntity).toList();
+                .map(this::convertToEntity)
+                .collect(Collectors.toList());
 
         List<PostImage> postImages = postDTO.getPostImages().stream()
-                .map(postImageDTO -> convertToEntity(postImageDTO, post)).toList();
+                .map(postImageDTO -> convertToEntity(postImageDTO, post))
+                .collect(Collectors.toList());
 
         post.setPostId(postDTO.getPostId());
+        post.setUser(userRepository.findByUuid(uuid).get());
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setViews(postDTO.getViews());
@@ -203,7 +202,6 @@ public class BoardServiceImpl implements BoardService {
 
         // 저장된 엔터티를 반환
         Post savedPost = postRepository.save(post);
-        System.out.println("createPost method execution completed.");
 
         // 저장된 엔터티를 다시 DTO로 변환
         return convertToDTO(savedPost);
@@ -211,17 +209,14 @@ public class BoardServiceImpl implements BoardService {
 
     // 게시물 수정
     @Override
-    public PostDTO updatePost(Long postId, PostDTO postDTO) {
+    public PostDTO updatePost(Long postId, PostDTO postDTO, UUID uuid) {
+        if (!postRepository.existsByPostIdAndUser_Uuid(postId, uuid)) {
+            throw new AccessDeniedException("이 게시물을 수정할 권한이 없습니다");
+        }
         Optional<Post> postOptional = postRepository.findById(postId);
 
         if (postOptional.isPresent()) {
             Post existingPost = postOptional.get();
-            existingPost.updateFullTextSearch();
-
-            UserSummaryDTO userDTO = postDTO.getUser();
-            if (userDTO == null) {
-                userDTO = new UserSummaryDTO();
-            }
 
             List<Hashtag> updatedHashtags = postDTO.getHashtags().stream()
                     .map(this::convertToEntity)
@@ -247,17 +242,24 @@ public class BoardServiceImpl implements BoardService {
                     .updatedAt(new Timestamp(System.currentTimeMillis()))
                     .build();
 
+            updatedPost.updateFullTextSearch(userRepository.findByUuid(uuid).get().getNickname());
+
             Post savedPost = postRepository.save(updatedPost);
 
-            return convertToDTO(savedPost, userDTO);
+            return convertToDTO(savedPost);
         }
 
         return null;
     }
 
+
     // 게시물 삭제
     @Override
-    public void deletePost(Long postId) {
+    @Transactional
+    public void deletePost(Long postId, UUID uuid) {
+        if (!postRepository.existsByPostIdAndUser_Uuid(postId, uuid)) {
+            throw new AccessDeniedException("이 게시물을 삭제할 권한이 없습니다");
+        }
         postRepository.deleteById(postId);
     }
 
@@ -280,7 +282,7 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    // 지난 주 좋아요 Top 10
+    // 지난 주 좋아요 Top 10 조회
     @Override
     public List<PostDTO> getTopLikedPosts(String boardName) {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
@@ -292,15 +294,35 @@ public class BoardServiceImpl implements BoardService {
                 .collect(Collectors.toList());
     }
 
-    // 유저 아이디로 UserSummaryDTO 찾기
-    private UserSummaryDTO findUserSummaryById(Long userId) {
-        User user = userRepository.findById(userId).orElse(null);
-
-        if (user != null) {
-            return new UserSummaryDTO(user.getId(), user.getNickname(), user.getProfileImg());
-        } else {
-            return null;
+    // 내가 작성한 글 조회
+    @Override
+    public List<PostDTO> getMyPosts(UUID uuid) {
+        Optional<User> currentUser = userRepository.findByUuid(uuid);
+        if (currentUser.isEmpty()) {
+            throw new NotFoundException("User not found");
         }
+
+        List<Post> myPosts = postRepository.findByUser_Uuid(currentUser.get().getUuid());
+        return myPosts.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // 내가 좋아요 표시한 글 조회
+    @Override
+    public List<PostDTO> getMyLikedPosts(UUID uuid) {
+        Optional<User> currentUser = userRepository.findByUuid(uuid);
+        if (currentUser.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        User user = currentUser.get();
+
+        return user.getReactions().stream()
+                .filter(Reaction::isLiked)
+                .map(Reaction::getPost)
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     // Board를 DTO로 변환
@@ -313,8 +335,6 @@ public class BoardServiceImpl implements BoardService {
 
     // Post를 DTO로 변환하기
     private PostDTO convertToDTO(Post post) {
-        UserSummaryDTO userDTO = convertToDTO(post.getUser());
-
         List<CommentResponseDTO> commentDTOs = convertCommentsToDTO(post.getComments());
         List<HashtagDTO> hashtagDTOs = convertHashtagsToDTO(post.getHashtags());
         List<PostImageDTO> postImageDTOs = convertImagesToDTO(post.getPostImages());
@@ -328,7 +348,6 @@ public class BoardServiceImpl implements BoardService {
                 .content(post.getContent())
                 .views(post.getViews())
                 .commentCount(post.getCommentCount())
-                .user(userDTO)
                 .board(post.getBoard())
                 .comments(commentDTOs)
                 .commentAllowed(post.getCommentAllowed())
@@ -389,6 +408,8 @@ public class BoardServiceImpl implements BoardService {
         }
 
         return UserSummaryDTO.builder()
+                .id(user.getId())
+                .uuid(user.getUuid())
                 .nickname(user.getNickname())
                 .profileImg(user.getProfileImg())
                 .build();
@@ -413,55 +434,33 @@ public class BoardServiceImpl implements BoardService {
                 .build();
     }
 
-    private PostDTO convertToDTO(Post post, UserSummaryDTO userDTO) {
-        List<CommentResponseDTO> commentDTOs = post.getComments().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        List<PostImageDTO> postImageDTOs = post.getPostImages().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        List<HashtagDTO> hashtagDTOs = post.getHashtags().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        return PostDTO.builder()
-                .postId(post.getPostId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .views(post.getViews())
-                .commentCount(post.getCommentCount())
-                .user(userDTO)
-                .board(post.getBoard())
-                .comments(commentDTOs)
-                .postImages(postImageDTOs)
-                .hashtags(hashtagDTOs)
-                .commentAllowed(post.getCommentAllowed())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .build();
-    }
-
     // PostDTO를 엔티티로 변환
     private Post convertToEntity(PostDTO postDTO) {
-        User user = convertToEntity(postDTO.getUser());
-        List<CommentResponseDTO> commentDTOs = postDTO.getComments();
-        List<Comment> comments = convertToEntity(commentDTOs);
+        UUID userUuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
 
-        return Post.builder()
-                .postId(postDTO.getPostId())
-                .title(postDTO.getTitle())
-                .content(postDTO.getContent())
-                .views(postDTO.getViews())
-                .comments(comments)
-                .commentCount(postDTO.getCommentCount())
-                .user(user)
-                .commentAllowed(postDTO.getCommentAllowed())
-                .board(postDTO.getBoard())
-                .createdAt(postDTO.getCreatedAt())
-                .updatedAt(postDTO.getUpdatedAt())
-                .build();
+        Optional<User> userOptional = userRepository.findByUuid(userUuid);
+
+        if (userOptional.isPresent()) {
+            List<CommentResponseDTO> commentDTOs = postDTO.getComments();
+            List<Comment> comments = convertToEntity(commentDTOs);
+
+            return Post.builder()
+                    .postId(postDTO.getPostId())
+                    .title(postDTO.getTitle())
+                    .content(postDTO.getContent())
+                    .views(postDTO.getViews())
+                    .comments(comments)
+                    .commentCount(postDTO.getCommentCount())
+                    .user(userOptional.get())
+                    .commentAllowed(postDTO.getCommentAllowed())
+                    .board(postDTO.getBoard())
+                    .createdAt(postDTO.getCreatedAt())
+                    .updatedAt(postDTO.getUpdatedAt())
+                    .build();
+        } else {
+            // Handle the case where the user is not found.
+            throw new EntityNotFoundException("User not found for UUID: " + userUuid);
+        }
     }
 
     // Comment 목록을 엔티티 목록으로 변환
