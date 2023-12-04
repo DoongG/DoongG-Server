@@ -108,7 +108,7 @@ public class Post {
         this.views++;
     }
 
-    public void updateFullTextSearch() {
-        this.fullTextSearch = title + " " + content + " " + getUser().getNickname();
+    public void updateFullTextSearch(String nickname) {
+        this.fullTextSearch = title + " " + content + " " + nickname;
     }
 }

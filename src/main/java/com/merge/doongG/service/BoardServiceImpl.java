@@ -179,7 +179,7 @@ public class BoardServiceImpl implements BoardService {
     @Transactional
     public PostDTO createPost(PostDTO postDTO, UUID uuid) {
         Post post = convertToEntity(postDTO);
-        post.updateFullTextSearch();
+        post.updateFullTextSearch(userRepository.findByUuid(uuid).get().getNickname());
 
         List<Hashtag> hashtags = postDTO.getHashtags().stream()
                 .map(this::convertToEntity)
@@ -218,8 +218,6 @@ public class BoardServiceImpl implements BoardService {
         if (postOptional.isPresent()) {
             Post existingPost = postOptional.get();
 
-            existingPost.updateFullTextSearch();
-
             List<Hashtag> updatedHashtags = postDTO.getHashtags().stream()
                     .map(this::convertToEntity)
                     .collect(Collectors.toList());
@@ -243,6 +241,8 @@ public class BoardServiceImpl implements BoardService {
                     .createdAt(existingPost.getCreatedAt())
                     .updatedAt(new Timestamp(System.currentTimeMillis()))
                     .build();
+
+            updatedPost.updateFullTextSearch(userRepository.findByUuid(uuid).get().getNickname());
 
             Post savedPost = postRepository.save(updatedPost);
 
