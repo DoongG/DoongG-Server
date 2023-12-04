@@ -12,8 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSummaryDTO {
-    private Long id;
-    private UUID uuid;
     private String nickname;
     private String profileImg;
 }
