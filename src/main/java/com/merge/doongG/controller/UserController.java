@@ -29,6 +29,7 @@ public class UserController {
     @PostMapping("/smsAuth") // SMS 인증 (/user/smsAuth)
     public ResponseEntity<String> smsAuth(@RequestBody SmsAuthDTO dto) {
         String result = userService.sendSMS(dto.getPhoneNumber());
+        System.out.print(result);
         return ResponseEntity.ok().body(result);
     }
 
@@ -40,8 +41,9 @@ public class UserController {
 
     @PostMapping("/login") // 로그인 (/user/login)
     public ResponseEntity<String> login(@RequestBody UserLoginDTO dto) {
-        String token = userService.login(dto.getEmail(), dto.getPassword());
-        return ResponseEntity.ok().body(token); // 토큰 반환
+        String str = userService.login(dto.getEmail(), dto.getPassword());
+
+        return ResponseEntity.ok().body(str); // 로그인 정보 반환
     }
 
     @PostMapping("/findEmail") // 이메일 찾기 (/user/findEmail)
