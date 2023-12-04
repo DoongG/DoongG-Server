@@ -1,9 +1,12 @@
 package com.merge.doongG.service;
 
+import com.merge.doongG.domain.Order;
+import com.merge.doongG.domain.OrderDetail;
+import com.merge.doongG.domain.Product;
 import com.merge.doongG.domain.User;
 import com.merge.doongG.dto.MyPageDTO;
-import com.merge.doongG.repository.CartRepository;
-import com.merge.doongG.repository.UserRepository;
+import com.merge.doongG.dto.OrderDTO;
+import com.merge.doongG.repository.*;
 import com.merge.doongG.utils.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +40,13 @@ public class UserService {
     }
 
     private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CartService cartService;
     private final CartRepository cartRepository;
+
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Value("${jwt.token.secret}")
     private String key;
@@ -123,10 +130,14 @@ public class UserService {
             return "1";
         }
 
-        // 로그인 성공 시 토근 생성 후 return
-        String token = JwtUtil.createToken(selectedUser.get().getNickname(), selectedUser.get().getUuid(), key, expireTimeMs);
+        String str = "";
 
-        return token;
+        String Stoken = JwtUtil.createToken(selectedUser.get().getNickname(), selectedUser.get().getUuid(), key, expireTimeMs);
+        String Snickname = selectedUser.get().getNickname();
+
+        str = Stoken + "," + Snickname;
+
+        return str;
     }
 
     // 이메일 찾기
@@ -266,5 +277,33 @@ public class UserService {
                 .build();
 
         return myPageDTO;
+    }
+
+    // 상품 주문
+    public String order(UUID uuid, OrderDTO dto) {
+        // uuid로 유저 찾기
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        // productID로 상품 찾기
+        Optional<Product> selectedProduct = shopRepository.findByProductID(dto.getProductId());
+
+        OrderDetail orderDetail = OrderDetail.builder()
+                .product(selectedProduct.get())
+                .build();
+
+        orderDetailRepository.save(orderDetail);
+
+        Order order = Order.builder()
+                .user(selectedUser.get())
+                .orderDetail(orderDetail)
+                .postcode(dto.getPostcode())
+                .orderStatus("결제완료")
+                .address(dto.getAddress())
+                .quantity(dto.getQuantity())
+                .build();
+
+        orderRepository.save(order);
+
+        return "true";
     }
 }

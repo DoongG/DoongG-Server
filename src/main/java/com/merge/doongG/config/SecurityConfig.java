@@ -5,10 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -29,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // 인증이 필요없는 경로 설정
-        return (web) -> web.ignoring().requestMatchers("/user/join" , "/user/login", "/shop/**", "/roomRivew/**", "/food/**"); // user, shop 경로는 인증이 필요없음
+        return (web) -> web.ignoring().requestMatchers("/boards/**","/user/**","/user/join" , "/user/login", "/shop/**", "/roomRivew/**", "/food/**"); // user, shop 경로는 인증이 필요없음
     }
 
     // spring security 설정
