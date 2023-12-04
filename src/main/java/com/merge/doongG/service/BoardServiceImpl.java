@@ -338,6 +338,7 @@ public class BoardServiceImpl implements BoardService {
         List<CommentResponseDTO> commentDTOs = convertCommentsToDTO(post.getComments());
         List<HashtagDTO> hashtagDTOs = convertHashtagsToDTO(post.getHashtags());
         List<PostImageDTO> postImageDTOs = convertImagesToDTO(post.getPostImages());
+        UserSummaryDTO userSummaryDTO = convertToDTO(post.getUser());
 
         int likeCount = (int) post.getReactions().stream().filter(Reaction::isLiked).count();
         int dislikeCount = (int) post.getReactions().stream().filter(Reaction::isDisliked).count();
@@ -349,6 +350,7 @@ public class BoardServiceImpl implements BoardService {
                 .views(post.getViews())
                 .commentCount(post.getCommentCount())
                 .board(post.getBoard())
+                .user(userSummaryDTO)
                 .comments(commentDTOs)
                 .commentAllowed(post.getCommentAllowed())
                 .likeCount(likeCount)
@@ -408,8 +410,6 @@ public class BoardServiceImpl implements BoardService {
         }
 
         return UserSummaryDTO.builder()
-                .id(user.getId())
-                .uuid(user.getUuid())
                 .nickname(user.getNickname())
                 .profileImg(user.getProfileImg())
                 .build();
@@ -488,7 +488,6 @@ public class BoardServiceImpl implements BoardService {
     // UserSummary를 엔티티로 변환
     private User convertToEntity(UserSummaryDTO commenter) {
         return User.builder()
-                .id(commenter.getId())
                 .nickname(commenter.getNickname())
                 .profileImg(commenter.getProfileImg())
                 .build();

@@ -30,6 +30,8 @@ public class PostDTO {
     @Builder.Default
     private List<HashtagDTO> hashtags = new ArrayList<>();
 
+    private UserSummaryDTO user;
+
     private String commentAllowed;
     private Timestamp createdAt, updatedAt;
 }
