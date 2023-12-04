@@ -16,13 +16,7 @@ public class OrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderDetailID;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-
     @OneToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
-    private int quantity;
 }

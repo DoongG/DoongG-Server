@@ -70,4 +70,12 @@ public class UserAuthController {
 
         return ResponseEntity.ok().body("true");
     }
+    // 상품 주문 (/userAuth/order)
+    @PostMapping("/order")
+    public ResponseEntity<String> order(@RequestBody OrderDTO dto) {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        userService.order(uuid, dto);
+
+        return ResponseEntity.ok().body("true");
+    }
 }
