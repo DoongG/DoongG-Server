@@ -4,6 +4,7 @@ import com.merge.doongG.domain.Order;
 import com.merge.doongG.domain.OrderDetail;
 import com.merge.doongG.domain.Product;
 import com.merge.doongG.domain.User;
+import com.merge.doongG.dto.MyOrderDTO;
 import com.merge.doongG.dto.MyPageDTO;
 import com.merge.doongG.dto.OrderDTO;
 import com.merge.doongG.repository.*;
@@ -15,12 +16,13 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -305,5 +307,36 @@ public class UserService {
         orderRepository.save(order);
 
         return "true";
+    }
+
+    // 주문내역 조회
+    public List<MyOrderDTO> myOrder(UUID uuid) {
+        // 해당 uuid로 유저 찾기
+        Optional<User> selectedUser = userRepository.findByUuid(uuid);
+
+        // 해당 유저의 id가 order의 customer_id와 같으므로 해당 유저의 id로 order 찾기
+        Long userId = selectedUser.get().getId();
+
+        List<Order> orderList = orderRepository.findByUserId(userId);
+        List<MyOrderDTO> myOrderDTOList = new ArrayList<>();
+
+        for (Order order : orderList) {
+            MyOrderDTO myOrderDTO = MyOrderDTO.builder()
+                    .orderId(order.getOrderId())
+                    .orderDate(order.getOrderDate().toString())
+                    .orderStatus(order.getOrderStatus())
+                    .postcode(order.getPostcode())
+                    .address(order.getAddress())
+                    .quantity(order.getQuantity())
+                    .productName(order.getOrderDetail().getProduct().getProductName())
+                    .productImg(order.getOrderDetail().getProduct().getProductImage())
+                    .productPrice(order.getOrderDetail().getProduct().getPrice())
+                    .productDiscountPrice(order.getOrderDetail().getProduct().getDiscountedPrice())
+                    .build();
+
+            myOrderDTOList.add(myOrderDTO);
+        }
+
+        return myOrderDTOList;
     }
 }
