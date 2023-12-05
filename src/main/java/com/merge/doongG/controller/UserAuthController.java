@@ -97,4 +97,13 @@ public class UserAuthController {
         List<PostDTO> result = boardService.getMyLikedPosts(uuid);
         return ResponseEntity.ok().body(result);
     }
+
+    // 주문 내역 조회
+    @GetMapping("/myOrders")
+    public ResponseEntity<List<MyOrderDTO>> getMyOrders() {
+        UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
+        List<MyOrderDTO> result = userService.myOrder(uuid);
+
+        return ResponseEntity.ok().body(result);
+    }
 }
