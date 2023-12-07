@@ -17,7 +17,7 @@ import java.util.List;
 public class PostDTO {
     private Long postId;
     private String title, content;
-    private Integer views, commentCount, likeCount, dislikeCount;
+    private Integer views, commentCount, likeCount, dislikeCount, postCount;
 
     private Board board;
 
