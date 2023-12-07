@@ -56,7 +56,7 @@ public class UserAuthController {
     }
 
     // 장바구니 조회 (/userAuth/getCart)
-    @PostMapping("/getCart")
+    @GetMapping("/getCart")
     public ResponseEntity<List<GetCartDTO>> getCart() {
         UUID uuid = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getDetails());
         List<GetCartDTO> result = cartSerivce.getCart(uuid);
