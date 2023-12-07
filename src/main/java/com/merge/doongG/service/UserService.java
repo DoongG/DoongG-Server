@@ -166,6 +166,7 @@ public class UserService {
                 .nickname(selectedUser.get().getNickname())
                 .profileImg(selectedUser.get().getProfileImg())
                 .phoneNumber(selectedUser.get().getPhoneNumber())
+                .reactions(selectedUser.get().getReactions())
                 .build();
 
         userRepository.save(user);
@@ -223,6 +224,7 @@ public class UserService {
                 .nickname(nickname)
                 .profileImg(selectedUser.get().getProfileImg())
                 .phoneNumber(selectedUser.get().getPhoneNumber())
+                .reactions(selectedUser.get().getReactions())
                 .build();
 
         userRepository.save(user);
@@ -242,6 +244,7 @@ public class UserService {
                 .nickname(selectedUser.get().getNickname())
                 .profileImg(profileImg)
                 .phoneNumber(selectedUser.get().getPhoneNumber())
+                .reactions(selectedUser.get().getReactions())
                 .build();
 
         userRepository.save(user);
@@ -261,6 +264,7 @@ public class UserService {
                 .nickname(selectedUser.get().getNickname())
                 .profileImg(selectedUser.get().getProfileImg())
                 .phoneNumber(selectedUser.get().getPhoneNumber())
+                .reactions(selectedUser.get().getReactions())
                 .build();
 
         userRepository.save(user);
