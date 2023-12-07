@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -42,10 +43,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p " +
             "WHERE p.board.boardName = :boardName " +
             "AND p.createdAt >= :oneWeekAgo " +
-            "ORDER BY SIZE(p.reactions) DESC")
-    List<Post> findTopLikedPosts(@Param("boardName") String boardName, @Param("oneWeekAgo") LocalDateTime oneWeekAgo, PageRequest pageable);
+            "ORDER BY p.likeCount DESC")
+    List<Post> findTopLikedPosts(@Param("boardName") String boardName, @Param("oneWeekAgo") LocalDateTime oneWeekAgo);
 
     List<Post> findByUser_Uuid(UUID uuid);
 
     boolean existsByPostIdAndUser_Uuid(Long postId, UUID uuid);
+
+    Page<Post> findByBoardBoardNameAndPostIdIn(String boardName, List<Long> postIds, Pageable pageable);
 }

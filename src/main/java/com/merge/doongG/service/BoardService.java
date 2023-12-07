@@ -22,6 +22,9 @@ public interface BoardService {
     // 게시물 검색
     Page<PostDTO> searchPosts(String boardName, String keyword, String order, int pageSize, int page, String searchType);
 
+    // 해시태그 검색
+    Page<PostDTO> searchPostsByHashtags(String boardName, List<String> hashtagNames, String order, int pageSize, int page);
+
     // 게시물 CRUD
     PostDTO getPost(Long postId);
     PostDTO createPost(PostDTO postDTO, UUID uuid);
@@ -34,6 +37,9 @@ public interface BoardService {
     // 게시판 디폴트 유형 조회
     String getBoardDefaultType(String boardName);
 
+    // 게시판 이름으로 BoardId 조회
+    Long getBoardIdByName(String boardName);
+
     // 전체 게시물 수 조회
     long getTotalPosts(String boardname);
 
@@ -42,7 +48,7 @@ public interface BoardService {
     void incrementPostViews(Long postId);
 
     // 지난 주 좋아요 Top 10 조회
-    List<PostDTO> getTopLikedPosts(String boardName);
+    List<PostDTO> getTopLikedPostsFromLastWeek(String boardName);
 
     // 내가 작성한 글 조회
     List<PostDTO> getMyPosts(UUID uuid);
