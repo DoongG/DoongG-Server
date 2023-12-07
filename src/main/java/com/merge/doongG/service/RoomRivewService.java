@@ -9,6 +9,8 @@ import com.merge.doongG.dto.WriteRoomRivewDTO;
 import com.merge.doongG.repository.RoomRivewRepository;
 import com.merge.doongG.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.api.OpenApiResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -94,5 +96,24 @@ public class RoomRivewService {
         list.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
 
         return list;
+    }
+
+    // 자취방 리뷰 삭제
+    public void deleteRoomRivew(UUID uuid, Long reviewId) {
+        Optional<RoomRivew> optionalRoomRivew = roomRivewRepository.findById(reviewId);
+
+        if (optionalRoomRivew.isPresent()) {
+            RoomRivew roomRivew = optionalRoomRivew.get();
+
+            // 현재 사용자가 리뷰 작성자인지 확인
+            if (!roomRivew.getUser().getUuid().equals(uuid)) {
+                throw new AccessDeniedException("이 리뷰를 삭제할 권한이 없습니다");
+            }
+
+            roomRivewRepository.deleteById(reviewId);
+        } else {
+            // 리뷰가 존재하지 않을 때 핸들링
+            throw new RuntimeException("Review with id " + reviewId + " not found");
+        }
     }
 }

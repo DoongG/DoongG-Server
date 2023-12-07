@@ -307,7 +307,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public List<PostDTO> getTopLikedPostsFromLastWeek(String boardName) {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
-        List<Post> posts = postRepository.findTopLikedPosts(boardName, oneWeekAgo);
+        List<Post> posts = postRepository.findTopLikedPosts(boardName, oneWeekAgo, PageRequest.of(0, 10));
         return posts.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 

@@ -44,7 +44,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE p.board.boardName = :boardName " +
             "AND p.createdAt >= :oneWeekAgo " +
             "ORDER BY p.likeCount DESC")
-    List<Post> findTopLikedPosts(@Param("boardName") String boardName, @Param("oneWeekAgo") LocalDateTime oneWeekAgo);
+    List<Post> findTopLikedPosts(@Param("boardName") String boardName, @Param("oneWeekAgo") LocalDateTime oneWeekAgo, Pageable pageable);
 
     List<Post> findByUser_Uuid(UUID uuid);
 
