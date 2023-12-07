@@ -376,6 +376,7 @@ public class BoardServiceImpl implements BoardService {
                 .postImages(postImageDTOs)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .postCount((int) getTotalPosts(post.getBoard().getBoardName()))
                 .build();
     }
 
