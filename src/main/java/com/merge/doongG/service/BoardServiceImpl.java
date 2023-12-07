@@ -76,6 +76,12 @@ public class BoardServiceImpl implements BoardService {
                 .orElse("default");
     }
 
+    // 게시판 이름으로 게시판 id 가져오기
+    @Override
+    public Long getBoardIdByName(String boardName) {
+        return boardRepository.findIdByName(boardName);
+    }
+
     // 모든 게시판 가져오기
     @Override
     public List<BoardDTO> getAllBoards() {
@@ -145,6 +151,21 @@ public class BoardServiceImpl implements BoardService {
         }
 
         return posts.map(this::convertToDTO);
+    }
+
+    // 해시태그 검색
+    @Override
+    public Page<PostDTO> searchPostsByHashtags(String boardName, List<String> hashtagNames, String order, int pageSize, int page) {
+        List<Hashtag> hashtags = hashtagRepository.findByHashtagNameIn(hashtagNames);
+        List<Long> postIds = hashtags.stream()
+                .flatMap(hashtag -> hashtag.getPosts().stream())
+                .map(Post::getPostId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        return postRepository.findByBoardBoardNameAndPostIdIn(boardName, postIds, pageable)
+                .map(this::convertToDTO);
     }
 
     private Page<Post> findByKeywordAndOrderLatest(String boardName, String keyword, String searchType, Pageable pageable) {
@@ -284,14 +305,10 @@ public class BoardServiceImpl implements BoardService {
 
     // 지난 주 좋아요 Top 10 조회
     @Override
-    public List<PostDTO> getTopLikedPosts(String boardName) {
+    public List<PostDTO> getTopLikedPostsFromLastWeek(String boardName) {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
-
-        List<Post> topLikedPosts = postRepository.findTopLikedPosts(boardName, oneWeekAgo, PageRequest.of(0, 10));
-
-        return topLikedPosts.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        List<Post> posts = postRepository.findTopLikedPosts(boardName, oneWeekAgo);
+        return posts.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     // 내가 작성한 글 조회

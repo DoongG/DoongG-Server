@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoardResponseDTO {
+    private Long boardId;
     private String boardName;
     private String boardDefaultType;
     private List<PostDTO> posts;

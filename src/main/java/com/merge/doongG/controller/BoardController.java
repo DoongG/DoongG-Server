@@ -39,8 +39,10 @@ public class BoardController {
         Page<PostDTO> posts = boardService.getBoard(boardName, order, pageSize, page);
 
         String boardType = boardService.getBoardDefaultType(boardName);
+        Long boardId = boardService.getBoardIdByName(boardName);
 
         BoardResponseDTO responseDTO = BoardResponseDTO.builder()
+                .boardId(boardId)
                 .boardName(boardName)
                 .boardDefaultType(boardType)
                 .postCount(posts.getTotalElements())
@@ -72,6 +74,18 @@ public class BoardController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    // 해시태그 검색
+    @GetMapping("/hashtagSearch/{boardName}")
+    public ResponseEntity<Page<PostDTO>> hashtagSearch(
+            @PathVariable String boardName,
+            @RequestParam List<String> hashtags,
+            @RequestParam(defaultValue = "latest") String order,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") int page) {
+        Page<PostDTO> posts = boardService.searchPostsByHashtags(boardName, hashtags, order, pageSize, page);
+        return ResponseEntity.ok(posts);
+    }
+
     // 게시물 상세 페이지
     @GetMapping("/posts/{postId}")
     public ResponseEntity<PostDTO> getPost(@PathVariable Long postId) {
@@ -89,7 +103,7 @@ public class BoardController {
     // carousel을 위한 좋아요 수 탑10 게시물 받아오기
     @GetMapping("/topLiked/{boardName}")
     public ResponseEntity<List<PostDTO>> getTopLikedPosts(@PathVariable String boardName) {
-        List<PostDTO> topLikedPosts = boardService.getTopLikedPosts(boardName);
+        List<PostDTO> topLikedPosts = boardService.getTopLikedPostsFromLastWeek(boardName);
         return new ResponseEntity<>(topLikedPosts, HttpStatus.OK);
     }
 }
