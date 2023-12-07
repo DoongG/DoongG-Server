@@ -54,7 +54,7 @@ public class BoardController {
 
     // 게시물 검색
     @GetMapping("/search/{boardName}")
-    public ResponseEntity<BoardResponseDTO> searchPosts(
+    public ResponseEntity<Page<PostDTO>> searchPosts(
             @PathVariable String boardName,
             @RequestParam String keyword,
             @RequestParam(defaultValue = "full") String searchType,
@@ -63,15 +63,7 @@ public class BoardController {
             @RequestParam(defaultValue = "1") int page) {
         Page<PostDTO> searchedPosts = boardService.searchPosts(boardName, keyword, order, pageSize, page, searchType);
 
-        String boardType = boardService.getBoardDefaultType(boardName);
-
-        BoardResponseDTO responseDTO = BoardResponseDTO.builder()
-                .boardName(boardName)
-                .boardDefaultType(boardType)
-                .posts(searchedPosts.getContent())
-                .build();
-
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.ok(searchedPosts);
     }
 
     // 해시태그 검색
