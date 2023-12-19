@@ -101,14 +101,16 @@ public class FoodService {
         }
 
         // MANUAL_IMG01~20 추출
-        String[] manual_img = new String[20];
+        List<String> manual_img = new ArrayList<>();
 
         for (int j = 1; j <= 20; j++) {
-            if (j < 10) {
-                // 개행문자 제거 후 저장
-                manual_img[j - 1] = (String) row.get("MANUAL_IMG0" + j);
-            } else {
-                manual_img[j - 1] = (String) row.get("MANUAL_IMG" + j);
+            String image = (j < 10) ? "MANUAL_IMG0" + j : "MANUAL_IMG" + j;
+            String imageValue = (String) row.get(image);
+
+            if (isValid(imageValue)) { // 이미지 GET 요청이 200일 경우에만 배열에 추가
+                manual_img.add(imageValue);
+            } else { // 200이 아닐 경우 빈 문자열 추가
+                manual_img.add("");
             }
         }
 
@@ -118,9 +120,23 @@ public class FoodService {
                 .RCP_PARTS_DTLS(rcpPartsDtls)
                 .ATT_FILE_NO_MAIN(attFileNoMain)
                 .manual(manual)
-                .manual_img(manual_img)
+                .manual_img(manual_img.toArray(new String[manual_img.size()]))
                 .build();
 
         return dto;
+    }
+
+    // 이미지가 존재하는지 확인
+    private boolean isValid(String url) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            ResponseEntity<Void> responseEntity = restTemplate.getForEntity(url, Void.class);
+            String[] result = responseEntity.getStatusCode().toString().split(" ");
+
+            return result[0].equals("200");
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
