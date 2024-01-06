@@ -31,6 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // JWT 없거나 직접 URL 입력으로 접근하는 경우를 쳐낼 수 있음
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         // 토큰 꺼내기
@@ -39,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // 토큰이 expired 되었는지 확인 (만료 시간이 지났는지)
         if (JwtUtil.isExpired(token, key)) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         // 토큰에서 userName 꺼내기
