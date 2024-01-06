@@ -27,7 +27,7 @@ public class BoardServiceImpl implements BoardService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final HashtagRepository hashtagRepository;
-    private static final List<String> DEFAULT_BOARD_NAMES = Arrays.asList("DefaultBoard1", "DefaultBoard2", "DefaultBoard3", "DefaultBoard4", "DefaultBoard5", "DefaultBoard6");
+    private static final List<String> DEFAULT_BOARD_NAMES = Arrays.asList("자유게시판", "레시피게시판", "맛집게시판", "게임게시판", "중고거래게시판", "생활꿀팁게시판");
 
     @Autowired
     public BoardServiceImpl(BoardRepository boardRepository, PostRepository postRepository,

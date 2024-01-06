@@ -21,17 +21,21 @@ public class DBInitializer implements CommandLineRunner {
     }
 
     private void createDefaultBoardsIfNotExist() {
-        for (int i = 1; i <= 6; i++) {
-            String boardName = "DefaultBoard" + i;
-            if (boardRepository.findByBoardName(boardName).isEmpty()) {
-                Board defaultBoard;
-                if (i % 2 == 1) {
-                    defaultBoard = Board.builder().boardName(boardName).boardDefaultType("gallery").build();
-                } else {
-                    defaultBoard = Board.builder().boardName(boardName).boardDefaultType("list").build();
-                }
-                boardRepository.save(defaultBoard);
-            }
+        createDefaultBoardIfNotExist("자유게시판", "list");
+        createDefaultBoardIfNotExist("레시피게시판", "gallery");
+        createDefaultBoardIfNotExist("맛집게시판", "gallery");
+        createDefaultBoardIfNotExist("게임게시판", "list");
+        createDefaultBoardIfNotExist("중고거래게시판", "gallery");
+        createDefaultBoardIfNotExist("생활꿀팁게시판", "list");
+    }
+
+    private void createDefaultBoardIfNotExist(String boardName, String boardDefaultType) {
+        if (boardRepository.findByBoardName(boardName).isEmpty()) {
+            Board defaultBoard = Board.builder()
+                    .boardName(boardName)
+                    .boardDefaultType(boardDefaultType)
+                    .build();
+            boardRepository.save(defaultBoard);
         }
     }
 

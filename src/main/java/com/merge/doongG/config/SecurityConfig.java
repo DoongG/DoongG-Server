@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // 인증이 필요없는 경로 설정
-        return (web) -> web.ignoring().requestMatchers("/boards/**","/user/**","/user/join" , "/user/login", "/shop/**", "/roomRivew/**", "/food/**"); // user, shop 경로는 인증이 필요없음
+        return (web) -> web.ignoring().requestMatchers("/boards/**","/user/**","/user/join" , "/user/login", "/shop/**", "/roomRivew/**", "/food/**", "/swagger-ui/**", "/v3/**"); // user, shop 경로는 인증이 필요없음
     }
 
     // spring security 설정

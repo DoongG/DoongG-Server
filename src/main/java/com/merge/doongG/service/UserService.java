@@ -15,6 +15,9 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -79,16 +82,16 @@ public class UserService {
             return "false";
         }
 
-//        Message message = new Message();
+        Message message = new Message();
 
         // 6자리 랜덤 숫자 생성
         String authNumber = String.valueOf((int) (Math.random() * 900000) + 100000);
 
-//        message.setFrom(apiPhone);
-//        message.setTo(phoneNumber);
-//        message.setText("[둥지] 자취생들의 안식처 둥지의 인증번호는 [" + authNumber + "] 입니다.");
+        message.setFrom(apiPhone);
+        message.setTo(phoneNumber);
+        message.setText("[둥지] 자취생들의 안식처 둥지의 인증번호는 [" + authNumber + "] 입니다.");
 
-//        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
+        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
 
         return authNumber;
     }
