@@ -37,3 +37,6 @@ out/
 .vscode/
 
 information-security.pem
+src/main/java/com/merge/doongG/DoongGApplication.java
+src/main/java/com/merge/doongG/config/WebConfig.java
+src/main/resources/application.properties
