@@ -1,0 +1,1421 @@
+---
+openapi: 3.0.1
+info:
+  title: 둥지 API 명세서
+  description: Springdoc을 사용한 Swagger UI
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+tags:
+  - name: 인증 필요 사용자 API
+    description: 로그인 및 토큰이 필요한 사용자 API
+  - name: 인증 불필요 게시판 API
+    description: 게시판과 게시물 관리를 위한 API
+  - name: 음식 API
+    description: 음식 레시피를 관리하기 위한 API
+  - name: 자취방 리뷰 API
+    description: 자취방 리뷰를 관리하기 위한 API
+  - name: 핫딜 API
+    description: 핫딜 관리를 위한 API
+  - name: 인증 불필요 사용자 API
+    description: 사용자 관리를 위한 API
+  - name: 인증 필요 게시판 API
+    description: 로그인 및 토큰이 필요한 게시판 API
+paths:
+  "/userAuth/order":
+    post:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 상품 주문
+      description: 현재 로그인한 사용자가 장바구니에 담긴 상품을 주문합니다.
+      operationId: order
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/OrderDTO"
+        required: true
+      responses:
+        '200':
+          description: 상품 주문 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/chPw":
+    post:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 비밀번호 변경
+      description: 현재 로그인한 사용자의 비밀번호를 변경합니다.
+      operationId: chPw
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ChPwDTO"
+        required: true
+      responses:
+        '200':
+          description: 비밀번호 변경 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/chProImg":
+    post:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 프로필 이미지 변경
+      description: 현재 로그인한 사용자의 프로필 이미지를 변경합니다.
+      operationId: chProImg
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ChProImgDTO"
+        required: true
+      responses:
+        '200':
+          description: 프로필 이미지 변경 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/chNick":
+    post:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 닉네임 변경
+      description: 현재 로그인한 사용자의 닉네임을 변경합니다.
+      operationId: chNick
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ChNicknameDTO"
+        required: true
+      responses:
+        '200':
+          description: 닉네임 변경 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/addCart":
+    post:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 장바구니 추가
+      description: 현재 로그인한 사용자의 장바구니에 상품을 추가합니다.
+      operationId: addCart
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/AddCartDTO"
+        required: true
+      responses:
+        '200':
+          description: 장바구니 추가 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/smsAuth":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: SMS 인증
+      description: SMS 인증을 수행합니다.
+      operationId: smsAuth
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/SmsAuthDTO"
+        required: true
+      responses:
+        '200':
+          description: SMS 인증 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/resetPw":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 비밀번호 재설정
+      description: 사용자 비밀번호를 재설정합니다.
+      operationId: resetPw
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ResetPwDTO"
+        required: true
+      responses:
+        '200':
+          description: 비밀번호 재설정 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/nicknameCheck":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 닉네임 중복 확인
+      description: 닉네임 중복을 확인합니다. 닉네임이 중복되면 'true'를 반환하고, 그렇지 않으면 'false'를 반환합니다.
+      operationId: nicknameCheck
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/NicknameCheckDTO"
+        required: true
+      responses:
+        '200':
+          description: 닉네임 중복 확인 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/login":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 로그인
+      description: 로그인을 수행합니다.
+      operationId: login
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/UserLoginDTO"
+        required: true
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/join":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 회원 가입
+      description: 회원 가입을 수행합니다.
+      operationId: join
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/UserJoinDTO"
+        required: true
+      responses:
+        '200':
+          description: 회원 가입 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/findEmail":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 이메일 조회
+      description: 닉네임과 전화번호로 사용자 이메일을 조회합니다.
+      operationId: findEmail
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/FindEmailDTO"
+        required: true
+      responses:
+        '200':
+          description: 이메일 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/emailCheck":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 이메일 중복 확인
+      description: 이메일 중복을 확인합니다. 이메일이 중복되면 'true'를 반환하고, 그렇지 않으면 'false'를 반환합니다.
+      operationId: emailCheck
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/EmailCheckDTO"
+        required: true
+      responses:
+        '200':
+          description: 이메일 중복 확인 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/user/emailAuth":
+    post:
+      tags:
+        - 인증 불필요 사용자 API
+      summary: 이메일 인증
+      description: 이메일을 통한 인증 메일을 발송합니다.
+      operationId: emailAuth
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/EmailAuthDTO"
+        required: true
+      responses:
+        '200':
+          description: 이메일 인증 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/roomRivewWrite":
+    post:
+      tags:
+        - 자취방 리뷰 API
+      summary: 자취방 리뷰 작성
+      description: 자취방 리뷰를 작성합니다.
+      operationId: roomRivewWrite
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/WriteRoomRivewDTO"
+        required: true
+      responses:
+        '200':
+          description: 자취방 리뷰 작성 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/roomRivewDelete/{reviewId}":
+    post:
+      tags:
+        - 자취방 리뷰 API
+      summary: 내가 쓴 자취방 리뷰 삭제
+      description: 현재 로그인한 사용자가 작성한 자취방 리뷰를 삭제합니다.
+      operationId: deleteRoomRivew
+      parameters:
+        - name: reviewId
+          in: path
+          description: 리뷰 ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: 내가 쓴 자취방 리뷰 삭제 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+        '404':
+          description: 해당 리뷰를 찾을 수 없음
+  "/food":
+    post:
+      tags:
+        - 음식 API
+      summary: 전체 레시피 조회
+      description: 입력된 재료를 기반으로 전체 레시피를 조회합니다.
+      operationId: findFood
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/IngredientsDTO"
+        required: true
+      responses:
+        '200':
+          description: 레시피 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boardsAuth/updatePost/{postId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 게시물 수정
+      description: 제공된 정보로 게시물 데이터를 업데이트합니다.
+      operationId: updatePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/PostDTO"
+        required: true
+      responses:
+        '200':
+          description: 게시물 수정 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/PostDTO"
+  "/boardsAuth/updateComment/{commentId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 댓글 수정
+      description: 지정된 댓글의 내용을 업데이트합니다.
+      operationId: updateComment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/CommentRequestDTO"
+        required: true
+      responses:
+        '200':
+          description: 댓글 수정 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boardsAuth/replies/{parentCommentId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 대댓글 추가
+      description: 지정된 부모 댓글에 답글을 추가합니다.
+      operationId: addReply
+      parameters:
+        - name: parentCommentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/CommentRequestDTO"
+        required: true
+      responses:
+        '200':
+          description: 대댓글 추가 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boardsAuth/like":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 좋아요
+      description: 요청된 게시물에 좋아요를 표시합니다.
+      operationId: likePost
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ReactionDTO"
+        required: true
+      responses:
+        '200':
+          description: 좋아요 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/ReactionDTO"
+  "/boardsAuth/dislike":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 싫어요
+      description: 요청된 게시물에 싫어요를 표시합니다.
+      operationId: dislikePost
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/ReactionDTO"
+        required: true
+      responses:
+        '200':
+          description: 싫어요 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/ReactionDTO"
+  "/boardsAuth/deletePost/{postId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 게시물 삭제
+      description: 지정된 ID의 게시물을 삭제합니다.
+      operationId: deletePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 게시물 삭제 성공
+  "/boardsAuth/deleteComment/{commentId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 댓글 삭제
+      description: 지정된 댓글을 삭제합니다.
+      operationId: deleteComment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 댓글 삭제 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boardsAuth/createPost":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 게시물 작성
+      description: 폼에서 받은 게시물 데이터를 DB에 삽입합니다.
+      operationId: createPost
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/PostDTO"
+        required: true
+      responses:
+        '201':
+          description: 게시물 작성 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/PostDTO"
+  "/boardsAuth/createComment/{postId}":
+    post:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 댓글 작성
+      description: 지정된 게시물에 댓글을 추가합니다.
+      operationId: addComment
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              "$ref": "#/components/schemas/CommentRequestDTO"
+        required: true
+      responses:
+        '200':
+          description: 댓글 작성 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boards/posts/increaseViews/{postId}":
+    post:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 조회 수 증가
+      description: 게시물의 조회 수를 증가시킵니다.
+      operationId: increasePostViews
+      parameters:
+        - name: postId
+          in: path
+          description: 게시물 ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: 조회 수 증가 성공
+  "/userAuth":
+    get:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 마이페이지 조회
+      description: 현재 로그인한 사용자의 마이페이지를 조회합니다.
+      operationId: myPage
+      responses:
+        '200':
+          description: 마이페이지 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/MyPageDTO"
+  "/userAuth/myPosts":
+    get:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 내가 작성한 글 조회
+      description: 현재 로그인한 사용자가 작성한 글을 조회합니다.
+      operationId: getMyPosts
+      responses:
+        '200':
+          description: 내가 작성한 글 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/myOrders":
+    get:
+      tags:
+        - 인증 필요 사용자 API
+      operationId: getMyOrders
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/MyOrderDTO"
+  "/userAuth/myLikedPosts":
+    get:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 내가 좋아요 표시한 글 조회
+      description: 현재 로그인한 사용자가 좋아요 표시한 글을 조회합니다.
+      operationId: getMyLikedPosts
+      responses:
+        '200':
+          description: 내가 좋아요 표시한 글 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/userAuth/getCart":
+    get:
+      tags:
+        - 인증 필요 사용자 API
+      summary: 장바구니 조회
+      description: 현재 로그인한 사용자의 장바구니를 조회합니다.
+      operationId: getCart
+      responses:
+        '200':
+          description: 장바구니 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/shop/new":
+    get:
+      tags:
+        - 핫딜 API
+      summary: 최근 상품 조회
+      description: 최근에 추가된 상품 중에서 최근 10개를 조회합니다.
+      operationId: getNew
+      responses:
+        '200':
+          description: 최근 상품 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/shop/getAll/{category}":
+    get:
+      tags:
+        - 핫딜 API
+      summary: 카테고리 별 상품 조회
+      description: 지정된 카테고리에 속한 상품들을 조회합니다.
+      operationId: getAll
+      parameters:
+        - name: category
+          in: path
+          description: 상품 카테고리
+          required: true
+          schema:
+            type: string
+          example: 뷰티
+      responses:
+        '200':
+          description: 카테고리 별 상품 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/shop/get/{productId}":
+    get:
+      tags:
+        - 핫딜 API
+      summary: 상품 하나 조회
+      description: 지정된 상품 ID에 해당하는 상품을 조회합니다.
+      operationId: getOne
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 상품 하나 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/GetOneDTO"
+  "/shop/best":
+    get:
+      tags:
+        - 핫딜 API
+      summary: 인기 상품 조회
+      description: 인기 상품 중에서 최근 10개를 조회합니다.
+      operationId: getBest
+      responses:
+        '200':
+          description: 인기 상품 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/roomRivew/getAll":
+    get:
+      tags:
+        - 자취방 리뷰 API
+      summary: 모든 자취방 리뷰 조회
+      description: 모든 자취방 리뷰를 조회합니다.
+      operationId: getAll_1
+      responses:
+        '200':
+          description: 자취방 리뷰 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/food/{name}":
+    get:
+      tags:
+        - 음식 API
+      summary: 레시피 상세 조회
+      description: 지정된 음식의 상세 레시피를 조회합니다.
+      operationId: findFoodDetail
+      parameters:
+        - name: name
+          in: path
+          description: 음식 이름
+          required: true
+          schema:
+            type: string
+          example: 해물아란치니
+      responses:
+        '200':
+          description: 레시피 상세 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/GetOneFoodDTO"
+  "/boards":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 통합 게시판 조회
+      description: 모든 통합 게시판을 조회합니다.
+      operationId: getUnifiedBoards
+      responses:
+        '200':
+          description: 통합 게시판 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boardsAuth/getReaction":
+    get:
+      tags:
+        - 인증 필요 게시판 API
+      summary: 리액션 조회
+      description: 게시물 ID를 사용하여 게시물의 리액션(좋아요, 싫어요)을 조회합니다.
+      operationId: getReactionsByPostId
+      parameters:
+        - name: postId
+          in: query
+          description: 리액션을 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 반응 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/ReactionDTO"
+  "/boards/{boardName}":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 게시판 렌더링
+      description: 지정된 게시판의 게시물을 조회합니다.
+      operationId: getBoard
+      parameters:
+        - name: boardName
+          in: path
+          description: 게시판 이름
+          required: true
+          schema:
+            type: string
+          example: 자유게시판
+        - name: order
+          in: query
+          description: 게시물 정렬 순서
+          required: true
+          schema:
+            type: string
+            default: latest
+          example: latest
+        - name: pageSize
+          in: query
+          description: 페이지 크기
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 12
+          example: 12
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 1
+          example: 1
+      responses:
+        '200':
+          description: 게시판 렌더링 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/BoardResponseDTO"
+  "/boards/topLiked/{boardName}":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: Carousel을 위한 좋아요 수 탑10 게시물 조회
+      description: 지정된 게시판에서 Carousel을 위한 좋아요 수 탑10 게시물을 조회합니다.
+      operationId: getTopLikedPosts
+      parameters:
+        - name: boardName
+          in: path
+          description: 게시판 이름
+          required: true
+          schema:
+            type: string
+          example: 게임게시판
+      responses:
+        '200':
+          description: Carousel을 위한 탑10 좋아요 수 게시물 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+  "/boards/search/{boardName}":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 게시물 검색
+      description: 게시판에서 키워드로 게시물을 검색합니다.
+      operationId: searchPosts
+      parameters:
+        - name: boardName
+          in: path
+          description: 게시판 이름
+          required: true
+          schema:
+            type: string
+          example: 레시피게시판
+        - name: keyword
+          in: query
+          description: 검색 키워드
+          required: true
+          schema:
+            type: string
+          example: 짜장
+        - name: searchType
+          in: query
+          description: 검색 유형
+          required: true
+          schema:
+            type: string
+            default: full
+          example: full
+        - name: order
+          in: query
+          description: 게시물 정렬 순서
+          required: true
+          schema:
+            type: string
+            default: latest
+          example: latest
+        - name: pageSize
+          in: query
+          description: 페이지 크기
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 12
+          example: 12
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 1
+          example: 1
+      responses:
+        '200':
+          description: 게시물 검색 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/Page"
+  "/boards/posts/{postId}":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 게시물 상세 페이지
+      description: 게시물의 상세 정보를 조회합니다.
+      operationId: getPost
+      parameters:
+        - name: postId
+          in: path
+          description: 게시물 ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: 게시물 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/PostDTO"
+  "/boards/hashtagSearch/{boardName}":
+    get:
+      tags:
+        - 인증 불필요 게시판 API
+      summary: 해시태그 검색
+      description: 게시판에서 해시태그로 게시물을 검색합니다.
+      operationId: hashtagSearch
+      parameters:
+        - name: boardName
+          in: path
+          description: 게시판 이름
+          required: true
+          schema:
+            type: string
+          example: 맛집게시판
+        - name: hashtags
+          in: query
+          description: 해시태그 리스트
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+          example: "[마라, 중식]"
+        - name: order
+          in: query
+          description: 게시물 정렬 순서
+          required: true
+          schema:
+            type: string
+            default: latest
+          example: latest
+        - name: pageSize
+          in: query
+          description: 페이지 크기
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 10
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 1
+          example: 1
+      responses:
+        '200':
+          description: 해시태그 검색 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/Page"
+  "/MyRoomRivew":
+    get:
+      tags:
+        - 자취방 리뷰 API
+      summary: 내가 쓴 자취방 리뷰 조회
+      description: 현재 로그인한 사용자가 작성한 자취방 리뷰를 조회합니다.
+      operationId: getMyRoomRivew
+      responses:
+        '200':
+          description: 내가 쓴 자취방 리뷰 조회 성공
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: string
+components:
+  schemas:
+    OrderDTO:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        postcode:
+          type: string
+        address:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+    ChPwDTO:
+      type: object
+      properties:
+        password:
+          type: string
+    ChProImgDTO:
+      type: object
+      properties:
+        profileImg:
+          type: string
+    ChNicknameDTO:
+      type: object
+      properties:
+        nickname:
+          type: string
+    AddCartDTO:
+      type: object
+      properties:
+        productID:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+    SmsAuthDTO:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+    ResetPwDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    NicknameCheckDTO:
+      type: object
+      properties:
+        nickname:
+          type: string
+    UserLoginDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    UserJoinDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        nickname:
+          type: string
+        profileImg:
+          type: string
+        phoneNumber:
+          type: string
+    FindEmailDTO:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        nickname:
+          type: string
+    EmailCheckDTO:
+      type: object
+      properties:
+        email:
+          type: string
+    EmailAuthDTO:
+      type: object
+      properties:
+        email:
+          type: string
+    WriteRoomRivewDTO:
+      type: object
+      properties:
+        address:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+        content:
+          type: string
+    IngredientsDTO:
+      type: object
+      properties:
+        ingredients:
+          type: array
+          items:
+            type: string
+    Board:
+      type: object
+      properties:
+        boardId:
+          type: integer
+          format: int64
+        boardName:
+          type: string
+        boardDefaultType:
+          type: string
+    CommentResponseDTO:
+      type: object
+      properties:
+        commentId:
+          type: integer
+          format: int64
+        post:
+          "$ref": "#/components/schemas/PostDTO"
+        commenter:
+          "$ref": "#/components/schemas/UserSummaryDTO"
+        parentCommentId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    HashtagDTO:
+      type: object
+      properties:
+        hashtagName:
+          type: string
+    PostDTO:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        views:
+          type: integer
+          format: int32
+        commentCount:
+          type: integer
+          format: int32
+        likeCount:
+          type: integer
+          format: int32
+        dislikeCount:
+          type: integer
+          format: int32
+        postCount:
+          type: integer
+          format: int32
+        board:
+          "$ref": "#/components/schemas/Board"
+        comments:
+          type: array
+          items:
+            "$ref": "#/components/schemas/CommentResponseDTO"
+        postImages:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PostImageDTO"
+        hashtags:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HashtagDTO"
+        user:
+          "$ref": "#/components/schemas/UserSummaryDTO"
+        commentAllowed:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PostImageDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        description:
+          type: string
+        imageType:
+          type: string
+    UserSummaryDTO:
+      type: object
+      properties:
+        nickname:
+          type: string
+        profileImg:
+          type: string
+    CommentRequestDTO:
+      type: object
+      properties:
+        content:
+          type: string
+        commenterId:
+          type: integer
+          format: int64
+    ReactionDTO:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        liked:
+          type: boolean
+        disliked:
+          type: boolean
+        likes:
+          type: integer
+          format: int32
+        dislikes:
+          type: integer
+          format: int32
+    MyPageDTO:
+      type: object
+      properties:
+        nickname:
+          type: string
+        profileImg:
+          type: string
+        email:
+          type: string
+    MyOrderDTO:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        orderDate:
+          type: string
+        orderStatus:
+          type: string
+        postcode:
+          type: string
+        address:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        productName:
+          type: string
+        productImg:
+          type: string
+        productPrice:
+          type: integer
+          format: int32
+        productDiscountPrice:
+          type: integer
+          format: int32
+    GetOneDTO:
+      type: object
+      properties:
+        productID:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        productImage:
+          type: string
+        productDescription:
+          type: string
+        category:
+          type: string
+        stock:
+          type: integer
+          format: int32
+        price:
+          type: integer
+          format: int32
+        discountedPrice:
+          type: integer
+          format: int32
+        viewCount:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+        reviews:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ReviewDTO"
+    ReviewDTO:
+      type: object
+      properties:
+        nickname:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+    GetOneFoodDTO:
+      type: object
+      properties:
+        manual:
+          type: array
+          items:
+            type: string
+        manual_img:
+          type: array
+          items:
+            type: string
+        att_FILE_NO_MAIN:
+          type: string
+        rcp_NM:
+          type: string
+        rcp_PARTS_DTLS:
+          type: string
+    BoardResponseDTO:
+      type: object
+      properties:
+        boardId:
+          type: integer
+          format: int64
+        boardName:
+          type: string
+        boardDefaultType:
+          type: string
+        posts:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PostDTO"
+        postCount:
+          type: integer
+          format: int64
+    Page:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            type: object
+        number:
+          type: integer
+          format: int32
+        sort:
+          "$ref": "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          "$ref": "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          "$ref": "#/components/schemas/SortObject"
+        pageSize:
+          type: integer
+          format: int32
+        pageNumber:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+        paged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
