@@ -29,12 +29,19 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
+	// runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+
+	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1' // jwt
+	implementation 'javax.xml.bind:jaxb-api:2.3.1' // jaxb 이거 작성해줘야 jwt 에러 안남
+
+	implementation 'net.nurigo:sdk:4.3.0' // sms 인증
+
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.0.5' // 이메일 인증
 }
 
 tasks.named('test') {
