@@ -28,6 +28,10 @@ public class CartDetail {
 
     private int quantity;
 
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     // 생성일자 자동생성
     @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;

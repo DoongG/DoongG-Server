@@ -1,7 +1,7 @@
 package com.merge.doongG.controller;
 
 import com.merge.doongG.dto.*;
-import com.merge.doongG.service.ShopServiceImpl;
+import com.merge.doongG.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/shop")
 public class ShopController {
-    private final ShopServiceImpl shopService;
+    private final ShopService shopService;
 
     @Operation(
             summary = "최근 상품 조회",

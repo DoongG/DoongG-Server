@@ -38,17 +38,24 @@ public class CartServiceImpl implements CartService {
         List<GetCartDTO> list = new ArrayList<>();
 
         // cartdetails에서 상품 정보 가져오기
-        for (int i = 0; i < cart.getCartDetails().size(); i++) {
-            GetCartDTO getCartDTO = GetCartDTO.builder()
-                    .productID(cart.getCartDetails().get(i).getProduct().getProductID())
-                    .productName(cart.getCartDetails().get(i).getProduct().getProductName())
-                    .productImage(cart.getCartDetails().get(i).getProduct().getProductImage())
-                    .price(cart.getCartDetails().get(i).getProduct().getPrice())
-                    .discountedPrice(cart.getCartDetails().get(i).getProduct().getDiscountedPrice())
-                    .quantity(cart.getCartDetails().get(i).getQuantity())
-                    .createdAt(cart.getCartDetails().get(i).getCreatedAt().toString())
-                    .build();
-            list.add(getCartDTO);
+        for (CartDetail cartDetail : cart.getCartDetails()) {
+            // 상품 ID를 통해 상품 정보 불러오기
+            Long productId = cartDetail.getProduct().getProductID();
+            Optional<Product> productOptional = productRepository.findByProductID(productId);
+
+            // 상품 정보가 존재하면 DTO에 추가
+            productOptional.ifPresent(product -> {
+                GetCartDTO getCartDTO = GetCartDTO.builder()
+                        .productID(product.getProductID())
+                        .productName(product.getProductName())
+                        .productImage(product.getProductImage())
+                        .price(product.getPrice())
+                        .discountedPrice(product.getDiscountedPrice())
+                        .quantity(cartDetail.getQuantity())
+                        .createdAt(cartDetail.getCreatedAt().toString())
+                        .build();
+                list.add(getCartDTO);
+            });
         }
 
         // 생성일자 기준으로 최신순 정렬
@@ -65,17 +72,30 @@ public class CartServiceImpl implements CartService {
         // productID로 상품 찾기
         Optional<Product> product = productRepository.findByProductID(productID);
 
-        // 장바구니에 상품 추가
-        CartDetail cartDetail = CartDetail.builder()
-                .cart(cart)
-                .product(product.get())
-                .quantity(quantity)
-                .build();
+        // 장바구니에 동일 상품이 이미 있는지 확인
+        Optional<CartDetail> existingCartDetail = cart.getCartDetails().stream()
+                .filter(cd -> cd.getProduct().getProductID().equals(productID))
+                .findFirst();
 
-        cart.getCartDetails().add(cartDetail);
+        if (existingCartDetail.isPresent()) {
+            // 이미 장바구니에 있는 경우: 수량을 증가시킴
+            CartDetail cartDetail = existingCartDetail.get();
+            cartDetail.setQuantity(cartDetail.getQuantity() + quantity);
+        } else {
+            // 장바구니에 상품 추가
+            CartDetail cartDetail = CartDetail.builder()
+                    .cart(cart)
+                    .product(product.get())
+                    .quantity(quantity)
+                    .build();
 
+            cart.getCartDetails().add(cartDetail);
+        }
+
+        // 장바구니 저장
         cartRepository.save(cart);
 
         return "true";
     }
+
 }
